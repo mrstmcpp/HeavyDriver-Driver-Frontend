@@ -19,56 +19,82 @@
 
     <ul id="list"></ul>
     <script>
-              var stompClient = null;
+      var stompClient = null;
 
-              document.addEventListener("DOMContentLoaded" , () => {
-                  connect();
-              })
+      document.addEventListener("DOMContentLoaded", () => {
+        connect();
+      });
+
+      function connect() {
+        const socket = new SockJS("http://localhost:3004/ws");
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function () {
+          console.log("connected");
+          //   stompClient.subscribe("/topic/ping" , function(message){
+          //       console.log("received a new messgae from the server " , message);
+          //   })
+          // stompClient.subscribe("/topic/scheduled" , function(message){
+          //     console.log("Received a new scheduled msg from server" , message);
+          //     const li = document.createElement("li");
+          //     li.textContent = message.body;
+          //     document.getElementById("list").appendChild(li);
+          // })
+
+          // stompClient.subscribe("/topic/message/213" , function(data){
+          //     console.log("Received a new scheduled msg from server" , data);
+          //     const msg = JSON.parse(data.body);
+          //     const li = document.createElement("li");
+          //     li.textContent = `${msg.name} : ${msg.timeStamp} : ${msg.message}`;
+          //     document.getElementById("list").appendChild(li);
+          // })
+          stompClient.subscribe("/topic/rideRequest", function (data) {
+            const bookingId = JSON.parse(data.body).bookingId;
+            console.log("Received a new ride request" + bookingId);
+            const response = confirm(
+              `You have a new ride request from passenger: ${
+                JSON.parse(data.body).passengerId
+              }. Do you accept it?`
+            );
+            if (response == true) {
+              const id = prompt("Please enter your driver id?");
+              stompClient.send(
+                `/app/rideResponse/${id}`,
+                {},
+                JSON.stringify({ response, bookingId })
+              );
+            }
+            stompClient.send(
+              "/app/rideResponse",
+              {},
+              JSON.stringify({ response, bookingId })
+            );
+            console.log(response);
 
 
-              function connect(){
-                  const socket = new SockJS("http://localhost:3004/ws")
-                  stompClient = Stomp.over(socket);
-                  stompClient.connect({} , function() {
-                      console.log("connected");
-                    //   stompClient.subscribe("/topic/ping" , function(message){
-                    //       console.log("received a new messgae from the server " , message);
-                    //   })
-                      // stompClient.subscribe("/topic/scheduled" , function(message){
-                      //     console.log("Received a new scheduled msg from server" , message);
-                      //     const li = document.createElement("li");
-                      //     li.textContent = message.body;
-                      //     document.getElementById("list").appendChild(li);
-                      // })
 
-                      // stompClient.subscribe("/topic/message/213" , function(data){
-                      //     console.log("Received a new scheduled msg from server" , data);
-                      //     const msg = JSON.parse(data.body);
-                      //     const li = document.createElement("li");
-                      //     li.textContent = `${msg.name} : ${msg.timeStamp} : ${msg.message}`;
-                      //     document.getElementById("list").appendChild(li);
-                      // })
-                      stompClient.subscribe("/topic/rideRequest" , function(data){
-                        const bookingId = JSON.parse(data.body).bookingId;
-                        console.log("Received a new ride request" + bookingId);
-                        const response = confirm(`You have a new ride request from passenger: ${JSON.parse(data.body).passengerId}. Do you accept it?`);
-                        if(response == true){
-                          const id = prompt("Please enter your driver id?")
-                          stompClient.send(`/app/rideResponse/${id}` , {} , JSON.stringify({response , bookingId}));
-                        }
-                        stompClient.send("/app/rideResponse" , {}, JSON.stringify({response , bookingId}) );
-                        console.log(response);
-                      })
-                  })
-              }
+            
 
-              function submit(){
-                  const name = document.getElementById("name").value;
-                const message = document.getElementById("message").value;
+            
+            stompClient.send(
+              "/app/rideResponse",
+              {},
+              JSON.stringify({ response, bookingId })
+            );
+            console.log(response);
+          });
+        });
+      }
 
-                stompClient.send("/app/chat/213", {}, JSON.stringify({ name, message }));
+      function submit() {
+        const name = document.getElementById("name").value;
+        const message = document.getElementById("message").value;
 
-              }
+        stompClient.send(
+          "/app/chat/213",
+          {},
+          JSON.stringify({ name, message })
+        );
+      }
     </script>
   </body>
 </html>

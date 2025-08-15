@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Driver Location Emitter</title>
+  <script src="https://cdn.jsdelivr.net/sockjs/1.1.4/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+  <h2>Driver Location Uploader</h2>
+  <label for="driverId">Driver ID:</label>
+  <input type="text" id="driverId" />
+  <button onclick="startSending()">Start Sending Location</button>
+
+  <ul id="list"></ul>
+  <script>
+    let stompClient = null;
+    let sendInterval = null;
+
+    function connect(callback) {
+      const socket = new SockJS("http://localhost:3004/ws");
+      stompClient = Stomp.over(socket);
+      stompClient.connect({}, () => {
+        console.log("WebSocket connected");
+        if (callback) callback(); // call startSending after connection is established
+      });
+    }
+
+    function startSending() {
+      const driverId = document.getElementById("driverId").value;
+      if (!driverId) {
+        alert("Please enter a driver ID.");
+        return;
+      }
+
+      if (!stompClient || !stompClient.connected) {
+        connect(() => beginLocationSending(driverId));
+      } else {
+        beginLocationSending(driverId);
+      }
+    }
+
+    function beginLocationSending(driverId) {
+      sendInterval = setInterval(() => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            const data = { driverId, latitude, longitude };
+            const li = document.createElement("li");
+            li.textContent = data.driverId + " , " + data.latitude + " , " + data.longitude;
+            document.getElementById("list").appendChild(li);
+            stompClient.send("/app/driver-location", {}, JSON.stringify(data));
+
+            console.log("Sent location:", data);
+          },
+          (err) => console.error("Location error", err),
+          { enableHighAccuracy: true }
+        );
+      }, 5000); // every 5 seconds
+    }
+  </script>
+</body>
+</html>
