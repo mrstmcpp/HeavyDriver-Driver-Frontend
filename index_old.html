@@ -57,11 +57,19 @@
             stompClient.send(
               `/app/rideResponse/${driverId}`,
               {},
-              JSON.stringify({ response, bookingId , driverId, passengerId })
+              JSON.stringify({ response, bookingId, driverId, passengerId })
             );
 
             console.log("Response sent:", response);
           });
+
+          stompClient.subscribe(
+            `/topic/driver/119/driver-location`,
+            function (data) {
+              const body = JSON.parse(data.body);
+              console.log("Received driver location update:", body);
+            }
+          );
         });
       }
 

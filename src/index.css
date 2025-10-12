@@ -1,4 +1,17 @@
+/*
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
 
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+@import "primeicons/primeicons.css";
+@import "primereact/resources/primereact.min.css";
+@import "primereact/resources/themes/viva-light/theme.css";
+
+
+button, [role="button"], a, input[type="button"], input[type="submit"] {
+  @apply cursor-pointer;
+}
+
+*/
