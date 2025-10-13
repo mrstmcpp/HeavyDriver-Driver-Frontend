@@ -19,23 +19,6 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // useEffect(() => {
-  //   const root = document.documentElement;
-  //   root.classList.toggle("dark", theme === "dark");
-
-  //   // Dynamically change PrimeReact theme
-  //   const link =
-  //     document.getElementById("prime-theme") || document.createElement("link");
-  //   link.id = "prime-theme";
-  //   link.rel = "stylesheet";
-  //   link.href =
-  //     theme === "dark"
-  //       ? "https://unpkg.com/primereact/resources/themes/viva-dark/theme.css"
-  //       : "https://unpkg.com/primereact/resources/themes/viva-light/theme.css";
-  //   document.head.appendChild(link);
-
-  //   localStorage.setItem("theme", theme);
-  // }, [theme]);
 
   const toggleTheme = () =>
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));

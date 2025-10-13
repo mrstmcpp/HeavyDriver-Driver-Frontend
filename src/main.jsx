@@ -5,15 +5,16 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { PrimeReactProvider } from "primereact/api";
+import { SocketProvider } from "./contexts/SocketContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
     <BrowserRouter>
-        <PrimeReactProvider>
+      <SocketProvider>
       <ThemeProvider>
+        <PrimeReactProvider>
           <App />
-      </ThemeProvider>
         </PrimeReactProvider>
+      </ThemeProvider>
+      </SocketProvider>
     </BrowserRouter>
-  </StrictMode>
 );

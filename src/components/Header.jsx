@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 
-const Header = () => {
+const Header = ({ onMenuClick }) => {
   const [open, setOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const { theme, toggleTheme } = useTheme();
 
-  // Close dropdown when clicking outside
+  const dropdownRef = useRef(null);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -23,15 +22,21 @@ const Header = () => {
 
   return (
     <header
-  className={`flex items-center justify-between px-6 py-4 transition-colors duration-300
+      className={`flex items-center justify-between px-6 py-4 transition-colors duration-300
   bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300
   dark:from-gray-900 dark:via-gray-800 dark:to-gray-700
   text-gray-900 dark:text-yellow-400
   shadow-[0_4px_12px_rgba(255,215,0,0.1)] border-b
   border-gray-400 dark:border-yellow-600/30`}
->
-
-      {/* Left: App title */}
+    >
+      <button
+        onClick={onMenuClick}
+        className="p-2 rounded-md border border-yellow-400 
+                   hover:bg-yellow-400/10 
+                   dark:border-gray-600 dark:hover:bg-gray-400/20"
+      >
+        <i className="pi pi-bars text-xl text-yellow-500"></i>
+      </button>
       <h1
         className="text-2xl font-bold tracking-wide 
         drop-shadow-[0_1px_3px_rgba(255,255,0,0.3)] 
@@ -40,25 +45,8 @@ const Header = () => {
         HeavyDriver
       </h1>
 
-      {/* Right: Theme toggle + profile */}
       <div className="relative" ref={dropdownRef}>
         <div className="flex flex-row items-center gap-4">
-          {/* Theme toggle button */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full border border-yellow-400 
-            hover:bg-yellow-400/10 
-            dark:border-gray-600 dark:hover:bg-gray-400/20 transition-colors duration-300"
-            title="Toggle Theme"
-          >
-            {theme === "dark" ? (
-              <i className="fa-solid fa-sun text-yellow-400 text-xl"></i>
-            ) : (
-              <i className="fa-solid fa-moon text-gray-900 text-xl"></i>
-            )}
-          </button>
-
-          {/* Profile dropdown button */}
           <button
             onClick={() => setOpen((prev) => !prev)}
             className="flex items-center gap-2 focus:outline-none hover:opacity-90 transition"
@@ -72,7 +60,6 @@ const Header = () => {
             <i className="fa-solid fa-chevron-down text-yellow-400 dark:text-gray-900 text-lg"></i>
           </button>
 
-          {/* Dropdown menu */}
           {open && (
             <div
               className="absolute right-0 top-full mt-2 w-44 
