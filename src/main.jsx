@@ -6,15 +6,18 @@ import App from "./App.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { PrimeReactProvider } from "primereact/api";
 import { SocketProvider } from "./contexts/SocketContext.jsx";
+import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-    <BrowserRouter>
+  <BrowserRouter>
+    <NotificationProvider>
       <SocketProvider>
-      <ThemeProvider>
-        <PrimeReactProvider>
-          <App />
-        </PrimeReactProvider>
-      </ThemeProvider>
+        <ThemeProvider>
+          <PrimeReactProvider>
+            <App />
+          </PrimeReactProvider>
+        </ThemeProvider>
       </SocketProvider>
-    </BrowserRouter>
+    </NotificationProvider>
+  </BrowserRouter>
 );
