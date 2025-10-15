@@ -1,4 +1,7 @@
 import "./App.css";
+import { useEffect } from "react";
+import axios from "axios";
+import useAuthStore from "./contexts/AuthContext.jsx";
 import { Route, Routes } from "react-router-dom";
 import Layout from "./layout/Layout.jsx";
 import Login from "./components/auth/Login.jsx";
@@ -9,19 +12,60 @@ import ActiveRide from "./components/pages/ActiveRide.jsx";
 import Earnings from "./components/pages/Earnings.jsx";
 import Profile from "./components/pages/Profile.jsx";
 import Settings from "./components/pages/Settings.jsx";
-import MyRides from "./components/pages/MyRides.jsx"; 
+import MyRides from "./components/pages/MyRides.jsx";
+import ProtectedRoutes from "./routes/ProtectedRoutes.jsx";
 
+axios.defaults.withCredentials = true;
 function App() {
+  const { checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
   return (
     <>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="active-ride" element={<ActiveRide />} />
-          <Route path="earnings" element={<Earnings />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="rides" element={<MyRides />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoutes>
+                <DashboardPage />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="active-ride"
+            element={
+              <ProtectedRoutes>
+                <ActiveRide />
+              </ProtectedRoutes>
+            }
+          />
+          <Route path="earnings" element={
+            <ProtectedRoutes>
+              <Earnings />
+            </ProtectedRoutes>
+          }
+          />
+          <Route path="profile" element={
+            <ProtectedRoutes>
+              <Profile />
+            </ProtectedRoutes>
+          }
+          />
+          <Route path="settings" element={
+            <ProtectedRoutes>
+              <Settings />
+            </ProtectedRoutes>
+          }
+          />
+          <Route path="rides" element={
+            <ProtectedRoutes>
+              <MyRides />
+            </ProtectedRoutes>
+          }
+          />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="*" element={<NotFound />} />

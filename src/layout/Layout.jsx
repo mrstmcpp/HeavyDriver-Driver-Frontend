@@ -10,7 +10,10 @@ const Layout = () => {
   return (
     <div className="flex flex-col min-h-screen transition-colors duration-300 bg-gray-100 dark:bg-gray-900">
       <Header onMenuClick={() => setSidebarVisible(true)} />
-      <SidebarComponent sidebarVisible={sidebarVisible} onHide={() => setSidebarVisible(false)} />
+      <SidebarComponent
+        sidebarVisible={sidebarVisible}
+        onHide={() => setSidebarVisible(false)}
+      />
       <main className="flex-grow p-6">
         <Outlet />
       </main>

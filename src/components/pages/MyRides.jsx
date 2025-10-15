@@ -3,14 +3,7 @@ import CarLoader from "../reusables/CarLoader";
 
 const MyRides = () => {
     const [loading, setLoading] = useState(true);
-    
-      useEffect(() => {
-        const timer = setTimeout(() => {
-          setLoading(false);
-        }, 1500); // 1.5 seconds simulated load
-    
-        return () => clearTimeout(timer);
-      }, []);
+  setLoading(false);
     
       if (loading) {
         return <CarLoader message="Loading your rides..." />;

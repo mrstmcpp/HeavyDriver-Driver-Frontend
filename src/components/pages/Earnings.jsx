@@ -3,14 +3,8 @@ import CarLoader from "../reusables/CarLoader";
 
 const Earnings = () => {
     const [loading, setLoading] = useState(true);
+  setLoading(false);
     
-      useEffect(() => {
-        const timer = setTimeout(() => {
-          setLoading(false);
-        }, 1500); // 1.5 seconds simulated load
-    
-        return () => clearTimeout(timer);
-      }, []);
     
       if (loading) {
         return <CarLoader message="Loading your earnings..." />;
