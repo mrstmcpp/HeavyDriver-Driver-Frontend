@@ -1,6 +1,14 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import SockJS from "sockjs-client/dist/sockjs";
 import Stomp from "stompjs";
+import axios from "axios";
 import { updateDriverStatus } from "../api/mockApi.js";
 import { useNotification } from "./NotificationContext.jsx";
 import useAuthStore from "./AuthContext.jsx";
@@ -14,17 +22,24 @@ export const SocketProvider = ({ children }) => {
   const [isDriverOnline, setDriverOnline] = useState(false);
   const [currentRideId, setCurrentRideId] = useState(null);
 
-  const { authUser, userId, loading } = useAuthStore();
+  const { authUser, activeBooking, userId, loading } = useAuthStore();
+  if(!loading && activeBooking){
+    setRideActive(true);
+    setCurrentRideId(activeBooking);
+  }
+
   const { showNotification } = useNotification();
 
   const clientRef = useRef(null);
   const rideSubscriptionRef = useRef(null);
+  const locationWatchRef = useRef(null);
+  const snapshotIntervalRef = useRef(null);
+  const latestLocationRef = useRef(null);
+  const lastSentRef = useRef(Date.now());
 
   const canConnect = !!authUser && !!userId && !loading;
 
-  /** 
-   * Memoized connectSocket — stable reference 
-   */
+  // connect websocket
   const connectSocket = useCallback(() => {
     if (!canConnect || clientRef.current) return;
 
@@ -37,17 +52,16 @@ export const SocketProvider = ({ children }) => {
       clientRef.current = stompClient;
 
       const notificationTopic = `/topic/driver/${userId}`;
-
       stompClient.subscribe(notificationTopic, (message) => {
         const data = JSON.parse(message.body);
 
         showNotification({
-          title: "New Ride Request",
+          title: "new ride request",
           icon: "pi pi-car",
           type: "ride",
           showActions: true,
-          confirmLabel: "Accept Ride",
-          declineLabel: "Decline",
+          confirmLabel: "accept ride",
+          declineLabel: "decline",
           message: {
             type: "rideRequest",
             pickup: {
@@ -95,12 +109,13 @@ export const SocketProvider = ({ children }) => {
       });
     });
 
-    stompClient.onclose = () => {
+    socket.onclose = () => {
       setConnected(false);
       clientRef.current = null;
     };
   }, [canConnect, userId, showNotification]);
 
+  // disconnect websocket
   const disconnectSocket = useCallback(() => {
     if (clientRef.current) {
       clientRef.current.disconnect(() => {
@@ -110,15 +125,13 @@ export const SocketProvider = ({ children }) => {
     }
   }, []);
 
-  /** 
-   * Handle ride subscription
-   */
+  // ride location subscription
   useEffect(() => {
     if (connected && rideActive && currentRideId && clientRef.current) {
       const topic = `/topic/driver/${userId}/ride/${currentRideId}/location`;
-      rideSubscriptionRef.current = clientRef.current.subscribe(topic, (message) => {
-        const update = JSON.parse(message.body);
-        console.log("Ride Location Update:", update);
+      rideSubscriptionRef.current = clientRef.current.subscribe(topic, (msg) => {
+        const update = JSON.parse(msg.body);
+        console.log("ride location update:", update);
       });
     } else if (rideSubscriptionRef.current) {
       rideSubscriptionRef.current.unsubscribe();
@@ -128,13 +141,12 @@ export const SocketProvider = ({ children }) => {
     return () => {
       if (rideSubscriptionRef.current) {
         rideSubscriptionRef.current.unsubscribe();
+        rideSubscriptionRef.current = null;
       }
     };
   }, [connected, rideActive, currentRideId, userId]);
 
-  /**
-   * Auto-connect when user becomes available
-   */
+  // auto connect or disconnect based on auth
   useEffect(() => {
     if (canConnect && !clientRef.current) {
       connectSocket();
@@ -144,14 +156,16 @@ export const SocketProvider = ({ children }) => {
     }
   }, [canConnect, authUser, connectSocket, disconnectSocket]);
 
+  // go online or offline
   const goOnline = async () => {
     if (!canConnect) return;
     try {
       await updateDriverStatus(userId, "ACTIVE");
       setDriverOnline(true);
       connectSocket();
+      startLocationUpdates();
     } catch (err) {
-      console.error("Failed to go online:", err);
+      console.error("failed to go online:", err);
     }
   };
 
@@ -160,21 +174,104 @@ export const SocketProvider = ({ children }) => {
     try {
       await updateDriverStatus(userId, "INACTIVE");
       setDriverOnline(false);
+      stopLocationUpdates();
       disconnectSocket();
     } catch (err) {
-      console.error("Failed to go offline:", err);
+      console.error("failed to go offline:", err);
     }
   };
 
+  // ride lifecycle
   const startRide = (rideId) => {
     setCurrentRideId(rideId);
     setRideActive(true);
+    startLocationUpdates();
   };
 
   const endRide = () => {
     setCurrentRideId(null);
     setRideActive(false);
+    stopLocationUpdates();
   };
+
+  // start location updates
+  const startLocationUpdates = () => {
+    if (!navigator.geolocation) {
+      console.error("geolocation is not supported by this browser.");
+      return;
+    }
+
+    stopLocationUpdates();
+
+    locationWatchRef.current = navigator.geolocation.watchPosition(
+      async (pos) => {
+        const location = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          driverId: userId,
+        };
+
+        latestLocationRef.current = location;
+
+        // send realtime updates only during ride
+        if (
+          rideActive &&
+          currentRideId &&
+          clientRef.current &&
+          connected &&
+          Date.now() - lastSentRef.current > 3000
+        ) {
+          clientRef.current.send(
+            `/app/driver/${userId}/ride/${currentRideId}/location`,
+            {},
+            JSON.stringify(location)
+          );
+          lastSentRef.current = Date.now();
+        }
+      },
+      (error) => {
+        console.error("error getting location:", error);
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+    );
+
+    // background snapshot updates every 60s
+    if (!snapshotIntervalRef.current && isDriverOnline && !rideActive) {
+      snapshotIntervalRef.current = setInterval(async () => {
+        if (latestLocationRef.current) {
+          try {
+            await axios.post(
+              `${import.meta.env.VITE_DRIVER_BACKEND_URL}/location/snapshot`,
+              latestLocationRef.current,
+              { withCredentials: true }
+            );
+          } catch (err) {
+            console.error("failed to send location snapshot:", err);
+          }
+        }
+      }, 60000);
+    }
+  };
+
+  // stop all tracking
+  const stopLocationUpdates = useCallback(() => {
+    if (locationWatchRef.current) {
+      navigator.geolocation.clearWatch(locationWatchRef.current);
+      locationWatchRef.current = null;
+    }
+    if (snapshotIntervalRef.current) {
+      clearInterval(snapshotIntervalRef.current);
+      snapshotIntervalRef.current = null;
+    }
+  }, []);
+
+  // cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopLocationUpdates();
+      disconnectSocket();
+    };
+  }, [stopLocationUpdates, disconnectSocket]);
 
   return (
     <SocketContext.Provider

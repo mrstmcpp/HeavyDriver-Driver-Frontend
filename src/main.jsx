@@ -10,14 +10,12 @@ import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
-    <NotificationProvider>
-      <SocketProvider>
-        <ThemeProvider>
-          <PrimeReactProvider>
+    <PrimeReactProvider>
+      <NotificationProvider>
+          <ThemeProvider>
             <App />
-          </PrimeReactProvider>
-        </ThemeProvider>
-      </SocketProvider>
-    </NotificationProvider>
+          </ThemeProvider>
+      </NotificationProvider>
+    </PrimeReactProvider>
   </BrowserRouter>
 );

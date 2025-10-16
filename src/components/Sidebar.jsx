@@ -11,7 +11,7 @@ const SidebarComponent = ({ sidebarVisible, onHide }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_AUTH_BACKEND_URL}/logout`, {}, { withCredentials: true });
+      await axios.post(`${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`, {}, { withCredentials: true });
       window.location.href = "/login"; // redirect after logout
     } catch (err) {
       console.error("Logout failed:", err);

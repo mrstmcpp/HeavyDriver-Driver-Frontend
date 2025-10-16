@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../contexts/ThemeContext.jsx";
 import CarLoader from "../reusables/CarLoader.jsx";
+import useAuthStore from "../../contexts/AuthContext.jsx";
 const DashboardPage = () => {
+  const { authUser } = useAuthStore();
   const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
-  setLoading(false);
+  useEffect(() => {
+    //simulate loading delay
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
     return <CarLoader message="Loading your dashboard..." />;
@@ -18,7 +27,7 @@ const DashboardPage = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-wide mb-2">
           Welcome Back,{" "}
-          <span className="text-yellow-500 dark:text-yellow-400">Driver!</span>
+          <span className="text-yellow-500 dark:text-yellow-400">{authUser.name}!</span>
         </h1>
         <p className="text-gray-600 dark:text-gray-300 text-sm">
           Here’s your activity overview and stats for today.
@@ -73,10 +82,30 @@ const DashboardPage = () => {
             </thead>
             <tbody>
               {[
-                { id: "R1234", date: "Oct 13, 2025", earn: "₹220", status: "Completed" },
-                { id: "R1235", date: "Oct 13, 2025", earn: "₹145", status: "Completed" },
-                { id: "R1236", date: "Oct 12, 2025", earn: "₹180", status: "Cancelled" },
-                { id: "R1237", date: "Oct 12, 2025", earn: "₹260", status: "Completed" },
+                {
+                  id: "R1234",
+                  date: "Oct 13, 2025",
+                  earn: "₹220",
+                  status: "Completed",
+                },
+                {
+                  id: "R1235",
+                  date: "Oct 13, 2025",
+                  earn: "₹145",
+                  status: "Completed",
+                },
+                {
+                  id: "R1236",
+                  date: "Oct 12, 2025",
+                  earn: "₹180",
+                  status: "Cancelled",
+                },
+                {
+                  id: "R1237",
+                  date: "Oct 12, 2025",
+                  earn: "₹260",
+                  status: "Completed",
+                },
               ].map((ride) => (
                 <tr
                   key={ride.id}

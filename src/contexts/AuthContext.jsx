@@ -7,9 +7,12 @@ const useAuthStore = create((set, get) => ({
   authUser: null,
   activeBooking: null,
   loading: true,
+  name: null,
+  role: null,
   userId: null,
 
   checkAuth: async () => {
+    // console.log("checkAuth called");
     set({ loading: true });
     try {
       const res = await axios.get(
@@ -18,10 +21,11 @@ const useAuthStore = create((set, get) => ({
       );
 
       if (res.data?.loggedIn) {
-        console.log("User is authenticated:", res.data);
+        // console.log("User is authenticated:", res.data);
 
         const userData = {
           email: res.data.user,
+          name: res.data.name,
           userId: res.data.userId,
           role: res.data.role,
         };
@@ -29,6 +33,8 @@ const useAuthStore = create((set, get) => ({
         set({
           authUser: userData,
           loading: false,
+          name: res.data.name,
+          role: res.data.role,
           userId: res.data.userId,
         });
 
@@ -41,6 +47,8 @@ const useAuthStore = create((set, get) => ({
           activeBooking: null,
           loading: false,
           userId: null,
+          name: null,
+          role: null,
         });
       }
     } catch (err) {
@@ -48,30 +56,32 @@ const useAuthStore = create((set, get) => ({
       set({
         authUser: null,
         activeBooking: null,
+          name: null,
+          role: null,
         loading: false,
         userId: null,
       });
     }
   },
 
-  // fetchActiveBooking: async (userId) => {
-  //   try {
-  //     const res = await axios.get(
-  //       `${import.meta.env.VITE_BOOKING_BACKEND_URL}/booking/active/${userId}`,
-  //       { withCredentials: true }
-  //     );
+  fetchActiveBooking: async (userId) => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/active/driver/${userId}`,
+        { withCredentials: true }
+      );
 
-  //     if (res.data) {
-  //       set({ activeBooking: res.data });
-  //       console.log("Active booking fetched:", res.data);
-  //     } else {
-  //       set({ activeBooking: null });
-  //     }
-  //   } catch (err) {
-  //     console.error("Failed to fetch active booking:", err.message);
-  //     set({ activeBooking: null });
-  //   }
-  // },
+      if (res.data) {
+        set({ activeBooking: res.data });
+        console.log("Active booking fetched:", res.data);
+      } else {
+        set({ activeBooking: null });
+      }
+    } catch (err) {
+      console.error("Failed to fetch active booking:", err.message);
+      set({ activeBooking: null });
+    }
+  },
 }));
 
 export default useAuthStore;

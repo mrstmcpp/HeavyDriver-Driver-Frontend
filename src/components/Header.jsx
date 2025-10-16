@@ -24,7 +24,7 @@ const Header = ({ onMenuClick }) => {
   const handleLogout = async () => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_AUTH_BACKEND_URL}/logout`,
+        `${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`,
         {},
         { withCredentials: true }
       );

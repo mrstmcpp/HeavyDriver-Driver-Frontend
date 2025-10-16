@@ -14,6 +14,7 @@ import Profile from "./components/pages/Profile.jsx";
 import Settings from "./components/pages/Settings.jsx";
 import MyRides from "./components/pages/MyRides.jsx";
 import ProtectedRoutes from "./routes/ProtectedRoutes.jsx";
+import { SocketProvider } from "./contexts/SocketContext.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -23,11 +24,11 @@ function App() {
     checkAuth();
   }, []);
   return (
-    <>
+    <SocketProvider>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="" element={<Layout />}>
           <Route
-            path="/dashboard"
+            path="/"
             element={
               <ProtectedRoutes>
                 <DashboardPage />
@@ -37,9 +38,9 @@ function App() {
           <Route
             path="active-ride"
             element={
-              <ProtectedRoutes>
+              // <ProtectedRoutes>
                 <ActiveRide />
-              </ProtectedRoutes>
+              // </ProtectedRoutes>
             }
           />
           <Route path="earnings" element={
@@ -71,7 +72,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </>
+    </SocketProvider>
   );
 }
 
