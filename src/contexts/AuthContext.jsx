@@ -11,6 +11,11 @@ const useAuthStore = create((set, get) => ({
   role: null,
   userId: null,
 
+  initializeAuth: async () => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) set({ authUser: storedUser });
+  },
+
   checkAuth: async () => {
     // console.log("checkAuth called");
     set({ loading: true });
@@ -56,8 +61,8 @@ const useAuthStore = create((set, get) => ({
       set({
         authUser: null,
         activeBooking: null,
-          name: null,
-          role: null,
+        name: null,
+        role: null,
         loading: false,
         userId: null,
       });

@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-google-maps/api": "^2.20.7",
     "@stomp/stompjs": "^7.2.0",
     "@tailwindcss/vite": "^4.1.14",
+    "@vis.gl/react-google-maps": "^1.5.5",
     "axios": "^1.12.2",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.7",

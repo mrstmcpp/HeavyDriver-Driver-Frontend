@@ -8,7 +8,7 @@ import Login from "./components/auth/Login.jsx";
 import Register from "./components/auth/Register.jsx";
 import DashboardPage from "./components/pages/Dashboard.jsx";
 import NotFound from "./components/404.jsx";
-import ActiveRide from "./components/pages/ActiveRide.jsx";
+import RideDetailsOnMap from "./components/pages/RideDetailsOnMap.jsx";
 import Earnings from "./components/pages/Earnings.jsx";
 import Profile from "./components/pages/Profile.jsx";
 import Settings from "./components/pages/Settings.jsx";
@@ -36,11 +36,11 @@ function App() {
             }
           />
           <Route
-            path="active-ride"
+            path="ride-details"
             element={
-              // <ProtectedRoutes>
-                <ActiveRide />
-              // </ProtectedRoutes>
+              <ProtectedRoutes>
+                <RideDetailsOnMap />
+              </ProtectedRoutes>
             }
           />
           <Route path="earnings" element={
