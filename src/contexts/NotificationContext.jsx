@@ -59,40 +59,46 @@ export const NotificationProvider = ({ children }) => {
   const renderMessage = (msg) => {
     if (typeof msg === "string") return <p className="text-base">{msg}</p>;
 
-    if (msg.type === "rideRequest") {
+    if (msg.type === "RIDE_REQUEST") {
       const { pickup, drop, fare, passenger } = msg;
       return (
         <div className="space-y-3 text-base leading-relaxed">
           <div>
             <p className="font-semibold text-yellow-400">Pickup Location:</p>
             <p className="text-sm">
-              {pickup.address} <br />
-              <span className="text-gray-400">
-                ({pickup.lat.toFixed(4)}, {pickup.lng.toFixed(4)})
-              </span>
+              {pickup.address || "Address not available"} <br />
+              {pickup.lat && pickup.lng && (
+                <span className="text-gray-400">
+                  ({pickup.lat.toFixed(4)}, {pickup.lng.toFixed(4)})
+                </span>
+              )}
             </p>
           </div>
 
           <div>
             <p className="font-semibold text-yellow-400">Drop Location:</p>
             <p className="text-sm">
-              {drop.address} <br />
-              <span className="text-gray-400">
-                ({drop.lat.toFixed(4)}, {drop.lng.toFixed(4)})
-              </span>
+              {drop.address || "Address not available"} <br />
+              {drop.lat && drop.lng && (
+                <span className="text-gray-400">
+                  ({drop.lat.toFixed(4)}, {drop.lng.toFixed(4)})
+                </span>
+              )}
             </p>
           </div>
 
           <div>
             <p className="font-semibold text-yellow-400">Fare:</p>
-            <p className="text-lg font-bold text-yellow-500">₹{fare}</p>
+            <p className="text-lg font-bold text-yellow-500">₹{fare || 0}</p>
           </div>
 
           {passenger && (
             <div>
-              <p className="font-semibold text-yellow-400">Passenger Details:</p>
+              <p className="font-semibold text-yellow-400">
+                Passenger Details:
+              </p>
               <p className="text-sm">
-                {passenger.name} <br />
+                {passenger.name || "Unknown"} <br />
                 Id: {passenger.id}
               </p>
             </div>

@@ -21,11 +21,14 @@ export const useLocationStore = create((set) => ({
                         lng: position.coords.longitude,
                     },
                     error: null
+                    
                 });
             },
+
             (error) => {
                 set({ error: error.message });
             }
         );
+        console.log(location.lat + " " + location.lng)
     }
 }));

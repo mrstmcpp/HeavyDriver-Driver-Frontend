@@ -8,10 +8,9 @@ import React, {
 } from "react";
 import SockJS from "sockjs-client/dist/sockjs";
 import Stomp from "stompjs";
-import axios from "axios";
 import { updateDriverStatus } from "../api/mockApi.js";
-import { useNotification } from "./NotificationContext.jsx";
 import useAuthStore from "./AuthContext.jsx";
+import { eventEmitter } from "../utils/eventEmitter";
 
 const SocketContext = createContext(null);
 export const useSocket = () => useContext(SocketContext);
@@ -22,28 +21,64 @@ export const SocketProvider = ({ children }) => {
   const [isDriverOnline, setDriverOnline] = useState(false);
   const [currentRideId, setCurrentRideId] = useState(null);
 
-  const { authUser, activeBooking, userId, loading } = useAuthStore();
-  if(!loading && activeBooking){
-    setRideActive(true);
-    setCurrentRideId(activeBooking);
-  }
-
-  const { showNotification } = useNotification();
-
+  const { authUser, userId, loading } = useAuthStore();
   const clientRef = useRef(null);
-  const rideSubscriptionRef = useRef(null);
-  const locationWatchRef = useRef(null);
-  const snapshotIntervalRef = useRef(null);
-  const latestLocationRef = useRef(null);
-  const lastSentRef = useRef(Date.now());
 
   const canConnect = !!authUser && !!userId && !loading;
 
-  // connect websocket
+  const parseRideEvent = (data) => {
+    switch (data.type) {
+      case "RIDE_REQUEST":
+        return {
+          event: "RIDE_REQUEST",
+          bookingId: data.bookingId,
+          passenger: {
+            id: data.passengerId || "Unknown",
+            name: data.passengerName || "Passenger",
+          },
+          pickup: {
+            address: data.pickupLocation?.pickupAddress || "Address not available",
+            lat: data.pickupLocation?.latitude || 0,
+            lng: data.pickupLocation?.longitude || 0,
+          },
+          drop: {
+            address: data.dropLocation?.dropAddress || "Address not available",
+            lat: data.dropLocation?.latitude || 0,
+            lng: data.dropLocation?.longitude || 0,
+          },
+          fare: data.fare || 0,
+        };
+
+      case "RIDE_CANCELLED":
+        return {
+          event: "RIDE_CANCELLED",
+          bookingId: data.bookingId,
+          reason: data.reason || "Passenger cancelled the ride.",
+        };
+
+      case "RIDE_STARTED":
+        return {
+          event: "RIDE_STARTED",
+          bookingId: data.bookingId,
+        };
+
+      case "RIDE_COMPLETED":
+        return {
+          event: "RIDE_COMPLETED",
+          bookingId: data.bookingId,
+        };
+
+      default:
+        console.warn("Unknown message type:", data.type);
+        return null;
+    }
+  };
+
   const connectSocket = useCallback(() => {
     if (!canConnect || clientRef.current) return;
 
-    const socket = new SockJS("http://localhost:3004/ws");
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:3004/ws";
+    const socket = new SockJS(socketUrl);
     const stompClient = Stomp.over(socket);
     stompClient.debug = null;
 
@@ -51,119 +86,54 @@ export const SocketProvider = ({ children }) => {
       setConnected(true);
       clientRef.current = stompClient;
 
-      const notificationTopic = `/topic/driver/${userId}`;
-      stompClient.subscribe(notificationTopic, (message) => {
-        const data = JSON.parse(message.body);
-
-        showNotification({
-          title: "new ride request",
-          icon: "pi pi-car",
-          type: "ride",
-          showActions: true,
-          confirmLabel: "accept ride",
-          declineLabel: "decline",
-          message: {
-            type: "rideRequest",
-            pickup: {
-              address: data.pickupLocation.pickupAddress,
-              lat: data.pickupLocation.latitude,
-              lng: data.pickupLocation.longitude,
-            },
-            drop: {
-              address: data.dropLocation.dropAddress,
-              lat: data.dropLocation.latitude,
-              lng: data.dropLocation.longitude,
-            },
-            fare: data.fare,
-            passenger: {
-              name: data.passengerName,
-              id: data.passengerId,
-            },
-          },
-          onConfirm: () => {
-            stompClient.send(
-              `/app/rideResponse/${userId}`,
-              {},
-              JSON.stringify({
-                response: true,
-                bookingId: data.bookingId,
-                driverId: userId,
-                passengerId: data.passengerId,
-              })
-            );
-            startRide(data.bookingId);
-          },
-          onDecline: () => {
-            stompClient.send(
-              `/app/rideResponse/${userId}`,
-              {},
-              JSON.stringify({
-                response: false,
-                bookingId: data.bookingId,
-                driverId: userId,
-                passengerId: data.passengerId,
-              })
-            );
-          },
-        });
+      const topic = `/topic/driver/${userId}`;
+      stompClient.subscribe(topic, (message) => {
+        try {
+          const data = JSON.parse(message.body);
+          const parsed = parseRideEvent(data);
+          if (parsed) eventEmitter.emit(parsed.event, parsed);
+          console.log("Socket message:", parsed);
+        } catch (err) {
+          console.error("Failed to parse message:", err);
+        }
       });
     });
 
     socket.onclose = () => {
+      console.warn("Socket disconnected");
       setConnected(false);
       clientRef.current = null;
+      //  auto-reconnect after delay
+      setTimeout(() => {
+        if (canConnect) connectSocket();
+      }, 5000);
     };
-  }, [canConnect, userId, showNotification]);
+  }, [canConnect, userId]);
 
-  // disconnect websocket
   const disconnectSocket = useCallback(() => {
     if (clientRef.current) {
       clientRef.current.disconnect(() => {
+        console.log("Disconnected from socket");
         setConnected(false);
         clientRef.current = null;
       });
     }
   }, []);
 
-  // ride location subscription
   useEffect(() => {
-    if (connected && rideActive && currentRideId && clientRef.current) {
-      const topic = `/topic/driver/${userId}/ride/${currentRideId}/location`;
-      rideSubscriptionRef.current = clientRef.current.subscribe(topic, (msg) => {
-        const update = JSON.parse(msg.body);
-        console.log("ride location update:", update);
-      });
-    } else if (rideSubscriptionRef.current) {
-      rideSubscriptionRef.current.unsubscribe();
-      rideSubscriptionRef.current = null;
-    }
-
-    return () => {
-      if (rideSubscriptionRef.current) {
-        rideSubscriptionRef.current.unsubscribe();
-        rideSubscriptionRef.current = null;
-      }
-    };
-  }, [connected, rideActive, currentRideId, userId]);
-
-  // auto connect or disconnect based on auth
-  useEffect(() => {
-    if (canConnect && !clientRef.current) {
-      connectSocket();
-    } else if (!authUser && clientRef.current) {
+    if (canConnect && !clientRef.current) connectSocket();
+    else if (!authUser && clientRef.current) {
       disconnectSocket();
       setDriverOnline(false);
     }
   }, [canConnect, authUser, connectSocket, disconnectSocket]);
 
-  // go online or offline
   const goOnline = async () => {
     if (!canConnect) return;
     try {
       await updateDriverStatus(userId, "ACTIVE");
       setDriverOnline(true);
       connectSocket();
-      startLocationUpdates();
     } catch (err) {
       console.error("failed to go online:", err);
     }
@@ -174,104 +144,21 @@ export const SocketProvider = ({ children }) => {
     try {
       await updateDriverStatus(userId, "INACTIVE");
       setDriverOnline(false);
-      stopLocationUpdates();
       disconnectSocket();
     } catch (err) {
       console.error("failed to go offline:", err);
     }
   };
 
-  // ride lifecycle
   const startRide = (rideId) => {
     setCurrentRideId(rideId);
     setRideActive(true);
-    startLocationUpdates();
   };
 
   const endRide = () => {
     setCurrentRideId(null);
     setRideActive(false);
-    stopLocationUpdates();
   };
-
-  // start location updates
-  const startLocationUpdates = () => {
-    if (!navigator.geolocation) {
-      console.error("geolocation is not supported by this browser.");
-      return;
-    }
-
-    stopLocationUpdates();
-
-    locationWatchRef.current = navigator.geolocation.watchPosition(
-      async (pos) => {
-        const location = {
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          driverId: userId,
-        };
-
-        latestLocationRef.current = location;
-
-        // send realtime updates only during ride
-        if (
-          rideActive &&
-          currentRideId &&
-          clientRef.current &&
-          connected &&
-          Date.now() - lastSentRef.current > 3000
-        ) {
-          clientRef.current.send(
-            `/app/driver/${userId}/ride/${currentRideId}/location`,
-            {},
-            JSON.stringify(location)
-          );
-          lastSentRef.current = Date.now();
-        }
-      },
-      (error) => {
-        console.error("error getting location:", error);
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
-    );
-
-    // background snapshot updates every 60s
-    if (!snapshotIntervalRef.current && isDriverOnline && !rideActive) {
-      snapshotIntervalRef.current = setInterval(async () => {
-        if (latestLocationRef.current) {
-          try {
-            await axios.post(
-              `${import.meta.env.VITE_DRIVER_BACKEND_URL}/location/snapshot`,
-              latestLocationRef.current,
-              { withCredentials: true }
-            );
-          } catch (err) {
-            console.error("failed to send location snapshot:", err);
-          }
-        }
-      }, 60000);
-    }
-  };
-
-  // stop all tracking
-  const stopLocationUpdates = useCallback(() => {
-    if (locationWatchRef.current) {
-      navigator.geolocation.clearWatch(locationWatchRef.current);
-      locationWatchRef.current = null;
-    }
-    if (snapshotIntervalRef.current) {
-      clearInterval(snapshotIntervalRef.current);
-      snapshotIntervalRef.current = null;
-    }
-  }, []);
-
-  // cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopLocationUpdates();
-      disconnectSocket();
-    };
-  }, [stopLocationUpdates, disconnectSocket]);
 
   return (
     <SocketContext.Provider
@@ -279,6 +166,7 @@ export const SocketProvider = ({ children }) => {
         connected,
         rideActive,
         isDriverOnline,
+        clientRef,
         goOnline,
         goOffline,
         startRide,

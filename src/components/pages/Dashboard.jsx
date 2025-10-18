@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useTheme } from "../../contexts/ThemeContext.jsx";
+
 import CarLoader from "../reusables/CarLoader.jsx";
 import useAuthStore from "../../contexts/AuthContext.jsx";
 import BookingsTable from "../reusables/BookingsTable.jsx";
@@ -8,8 +8,9 @@ const DashboardPage = () => {
   const { authUser } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
+
+  //wiill remove later
   useEffect(() => {
-    //simulate loading delay
     const timer = setTimeout(() => {
       setLoading(false);
     }, 300);

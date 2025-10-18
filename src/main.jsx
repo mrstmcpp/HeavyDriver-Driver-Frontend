@@ -9,13 +9,15 @@ import { SocketProvider } from "./contexts/SocketContext.jsx";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
-    <PrimeReactProvider>
-      <NotificationProvider>
-          <ThemeProvider>
-            <App />
-          </ThemeProvider>
-      </NotificationProvider>
-    </PrimeReactProvider>
-  </BrowserRouter>
+    <BrowserRouter>
+      <PrimeReactProvider>
+        <NotificationProvider>
+          <SocketProvider>
+            <ThemeProvider>
+              <App />
+            </ThemeProvider>
+          </SocketProvider>
+        </NotificationProvider>
+      </PrimeReactProvider>
+    </BrowserRouter>
 );

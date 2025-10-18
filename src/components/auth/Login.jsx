@@ -1,4 +1,4 @@
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../contexts/AuthContext";
 import axios from "axios";
@@ -16,7 +16,7 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "DRIVER", 
+    role: "DRIVER",
   });
 
   const [error, setError] = useState("");
@@ -35,29 +35,40 @@ const Login = () => {
       const response = await axios.post(
         `${import.meta.env.VITE_AUTH_BACKEND_URL}/signin`,
         formData,
-        { withCredentials: true } 
+        { withCredentials: true }
       );
 
       if (response.data.success) {
-        const validate = await axios.get(`${import.meta.env.VITE_AUTH_BACKEND_URL}/validate`, {
-          withCredentials: true,
-        });
 
-        if (validate.data.loggedIn) {
-          setUser({
-            email: validate.data.user,
-            userId: validate.data.userId,
-            role: validate.data.role,
-          });
-          navigate("/"); // redirect after login
+        const { user, userId, role } = response.data;
+
+        if (user && userId && role) {
+          setUser({ email: user, userId, role });
+          navigate("/");
         } else {
-          setError("Token validation failed.");
+
+          const validate = await axios.get(
+            `${import.meta.env.VITE_AUTH_BACKEND_URL}/validate`,
+            { withCredentials: true }
+          );
+
+          if (validate.data.loggedIn) {
+            setUser({
+              email: validate.data.user,
+              userId: validate.data.userId,
+              role: validate.data.role,
+            });
+            navigate("/");
+          } else {
+            setError("Login successful, but token not validated.");
+          }
         }
       } else {
-        setError("Invalid credentials.");
+        setError("Invalid credentials. Try again.");
       }
     } catch (err) {
-      setError("Login failed. Check email, password.");
+      console.error(err);
+      setError("Login failed. Please check your email or password.");
     } finally {
       setLoading(false);
     }
@@ -66,11 +77,15 @@ const Login = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
       <div className="bg-gray-800 p-6 rounded-2xl shadow-md w-96 border border-yellow-500">
-        <h1 className="text-3xl font-bold text-center mb-6 text-yellow-400">Login</h1>
+        <h1 className="text-3xl font-bold text-center mb-6 text-yellow-400">
+          Login
+        </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">Email</label>
+            <label className="block text-sm font-medium mb-1 text-yellow-300">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -82,7 +97,9 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">Password</label>
+            <label className="block text-sm font-medium mb-1 text-yellow-300">
+              Password
+            </label>
             <input
               type="password"
               name="password"

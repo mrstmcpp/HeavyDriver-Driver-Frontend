@@ -11,6 +11,16 @@ const useAuthStore = create((set, get) => ({
   role: null,
   userId: null,
 
+  setUser: (userData) => {
+    set({
+      authUser: userData,
+      name: userData.name || null,
+      role: userData.role || null,
+      userId: userData.userId || null,
+    });
+    localStorage.setItem("user", JSON.stringify(userData)); // sstoring non-sensitive data
+  },
+
   initializeAuth: async () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) set({ authUser: storedUser });

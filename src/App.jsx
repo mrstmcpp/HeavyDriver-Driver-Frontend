@@ -14,7 +14,7 @@ import Profile from "./components/pages/Profile.jsx";
 import Settings from "./components/pages/Settings.jsx";
 import MyRides from "./components/pages/MyRides.jsx";
 import ProtectedRoutes from "./routes/ProtectedRoutes.jsx";
-import { SocketProvider } from "./contexts/SocketContext.jsx";
+import RideNotificationManager from "./components/RideNotificationManager.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -24,7 +24,8 @@ function App() {
     checkAuth();
   }, []);
   return (
-    <SocketProvider>
+    <>
+      <RideNotificationManager />
       <Routes>
         <Route path="" element={<Layout />}>
           <Route
@@ -43,36 +44,44 @@ function App() {
               </ProtectedRoutes>
             }
           />
-          <Route path="earnings" element={
-            <ProtectedRoutes>
-              <Earnings />
-            </ProtectedRoutes>
-          }
+          <Route
+            path="earnings"
+            element={
+              <ProtectedRoutes>
+                <Earnings />
+              </ProtectedRoutes>
+            }
           />
-          <Route path="profile" element={
-            <ProtectedRoutes>
-              <Profile />
-            </ProtectedRoutes>
-          }
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoutes>
+                <Profile />
+              </ProtectedRoutes>
+            }
           />
-          <Route path="settings" element={
-            <ProtectedRoutes>
-              <Settings />
-            </ProtectedRoutes>
-          }
+          <Route
+            path="settings"
+            element={
+              <ProtectedRoutes>
+                <Settings />
+              </ProtectedRoutes>
+            }
           />
-          <Route path="rides" element={
-            <ProtectedRoutes>
-              <MyRides />
-            </ProtectedRoutes>
-          }
+          <Route
+            path="rides"
+            element={
+              <ProtectedRoutes>
+                <MyRides />
+              </ProtectedRoutes>
+            }
           />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </SocketProvider>
+    </>
   );
 }
 
