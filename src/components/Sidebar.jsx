@@ -3,7 +3,6 @@ import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import DriverStatusButton from "./reusables/DriverStatusButton.jsx";
 import useAuthStore from "../contexts/AuthContext.jsx";
-import { useEffect } from "react";
 import axios from "axios";
 
 const SidebarComponent = ({ sidebarVisible, onHide }) => {

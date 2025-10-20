@@ -5,7 +5,6 @@ axios.defaults.withCredentials = true;
 
 const useAuthStore = create((set, get) => ({
   authUser: null,
-  activeBooking: null,
   loading: true,
   name: null,
   role: null,
@@ -52,14 +51,9 @@ const useAuthStore = create((set, get) => ({
           role: res.data.role,
           userId: res.data.userId,
         });
-
-        if (get().fetchActiveBooking) {
-          get().fetchActiveBooking(res.data.userId);
-        }
       } else {
         set({
           authUser: null,
-          activeBooking: null,
           loading: false,
           userId: null,
           name: null,
@@ -70,47 +64,11 @@ const useAuthStore = create((set, get) => ({
       console.error("Auth validation failed:", err.message);
       set({
         authUser: null,
-        activeBooking: null,
         name: null,
         role: null,
         loading: false,
         userId: null,
       });
-    }
-  },
-
-  fetchActiveBooking: async (userId) => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/active/driver/${userId}`,
-        { withCredentials: true }
-      );
-
-      if (res.data) {
-        set({ activeBooking: res.data });
-        if (import.meta.env.DEV)
-          console.log("Active booking fetched:", res.data);
-      } else {
-        set({ activeBooking: null });
-      }
-    } catch (err) {
-      const status = err.response?.status;
-
-      if (status === 404) {
-        // booking not found — normal case
-        set({ activeBooking: null });
-        if (import.meta.env.DEV)
-          console.warn("ℹNo active booking found for this driver.");
-      } else {
-        // unexpected error
-        console.error(
-          "Could not fetch active booking. Please try again later."
-        );
-        set({ activeBooking: null });
-      }
-
-      // Optional: show a small toast or alert for the user
-      // toast.error("Unable to load your active booking. Please try again later.");
     }
   },
 }));

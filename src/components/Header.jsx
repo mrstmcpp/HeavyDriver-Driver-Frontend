@@ -4,12 +4,14 @@ import useAuthStore from "../contexts/AuthContext.jsx";
 import axios from "axios";
 import { useNotification } from "../contexts/NotificationContext.jsx";
 import { useSocket } from "../contexts/SocketContext.jsx";
+import useBookingStore from "../contexts/BookingContext.jsx"
 
 const Header = ({ onMenuClick }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  const { authUser, activeBooking, loading } = useAuthStore();
+  const { authUser, userId, loading } = useAuthStore();
+  const {activeBooking} = useBookingStore();
   const { showToast } = useNotification();
   const {connected} = useSocket();
 

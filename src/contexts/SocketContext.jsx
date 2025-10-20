@@ -107,7 +107,6 @@ export const SocketProvider = ({ children }) => {
     socket.onclose = () => {
       console.warn("Socket disconnected");
       setConnected(false);
-
       clientRef.current = null;
 
       setTimeout(() => {
@@ -154,7 +153,6 @@ export const SocketProvider = ({ children }) => {
   const goOnline = async () => {
     if (!canConnect) return;
     try {
-      await updateDriverStatus(userId, "ACTIVE");
       setDriverOnline(true);
     } catch (err) {
       console.error("failed to go online:", err);
@@ -164,7 +162,6 @@ export const SocketProvider = ({ children }) => {
   const goOffline = async () => {
     if (!userId) return;
     try {
-      await updateDriverStatus(userId, "INACTIVE");
       setDriverOnline(false);
     } catch (err) {
       console.error("failed to go offline:", err);
