@@ -88,13 +88,29 @@ const useAuthStore = create((set, get) => ({
 
       if (res.data) {
         set({ activeBooking: res.data });
-        console.log("Active booking fetched:", res.data);
+        if (import.meta.env.DEV)
+          console.log("Active booking fetched:", res.data);
       } else {
         set({ activeBooking: null });
       }
     } catch (err) {
-      console.error("Failed to fetch active booking:", err.message);
-      set({ activeBooking: null });
+      const status = err.response?.status;
+
+      if (status === 404) {
+        // booking not found — normal case
+        set({ activeBooking: null });
+        if (import.meta.env.DEV)
+          console.warn("ℹNo active booking found for this driver.");
+      } else {
+        // unexpected error
+        console.error(
+          "Could not fetch active booking. Please try again later."
+        );
+        set({ activeBooking: null });
+      }
+
+      // Optional: show a small toast or alert for the user
+      // toast.error("Unable to load your active booking. Please try again later.");
     }
   },
 }));

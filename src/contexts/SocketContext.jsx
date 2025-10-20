@@ -11,6 +11,7 @@ import Stomp from "stompjs";
 import { updateDriverStatus } from "../api/mockApi.js";
 import useAuthStore from "./AuthContext.jsx";
 import { eventEmitter } from "../utils/eventEmitter";
+import { useNotification } from "./NotificationContext.jsx";
 
 const SocketContext = createContext(null);
 export const useSocket = () => useContext(SocketContext);
@@ -20,6 +21,7 @@ export const SocketProvider = ({ children }) => {
   const [rideActive, setRideActive] = useState(false);
   const [isDriverOnline, setDriverOnline] = useState(false);
   const [currentRideId, setCurrentRideId] = useState(null);
+  const { showToast } = useNotification();
 
   const { authUser, userId, loading } = useAuthStore();
   const clientRef = useRef(null);
@@ -37,7 +39,8 @@ export const SocketProvider = ({ children }) => {
             name: data.passengerName || "Passenger",
           },
           pickup: {
-            address: data.pickupLocation?.pickupAddress || "Address not available",
+            address:
+              data.pickupLocation?.pickupAddress || "Address not available",
             lat: data.pickupLocation?.latitude || 0,
             lng: data.pickupLocation?.longitude || 0,
           },
@@ -77,13 +80,15 @@ export const SocketProvider = ({ children }) => {
   const connectSocket = useCallback(() => {
     if (!canConnect || clientRef.current) return;
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:3004/ws";
+    const socketUrl =
+      import.meta.env.VITE_SOCKET_URL || "http://localhost:3004/ws";
     const socket = new SockJS(socketUrl);
     const stompClient = Stomp.over(socket);
     stompClient.debug = null;
 
     stompClient.connect({}, () => {
       setConnected(true);
+      showToast("success", "You are online now.", "Ready for ride.");
       clientRef.current = stompClient;
 
       const topic = `/topic/driver/${userId}`;
@@ -102,38 +107,55 @@ export const SocketProvider = ({ children }) => {
     socket.onclose = () => {
       console.warn("Socket disconnected");
       setConnected(false);
+
       clientRef.current = null;
-      //  auto-reconnect after delay
+
       setTimeout(() => {
-        if (canConnect) connectSocket();
+        if (canConnect && isDriverOnline) {
+          showToast(
+            "error",
+            "Disconnected.",
+            "Attempting to reconnect."
+          );
+          console.log("Attempting to reconnect...");
+          connectSocket();
+        }
       }, 5000);
     };
-  }, [canConnect, userId]);
+  }, [canConnect, userId, isDriverOnline]);
 
   const disconnectSocket = useCallback(() => {
     if (clientRef.current) {
       clientRef.current.disconnect(() => {
         console.log("Disconnected from socket");
         setConnected(false);
+        showToast(
+          "info",
+          "You are offline now.",
+          "No ride notifications will be received."
+        );
         clientRef.current = null;
       });
     }
   }, []);
 
   useEffect(() => {
-    if (canConnect && !clientRef.current) connectSocket();
-    else if (!authUser && clientRef.current) {
-      disconnectSocket();
-      setDriverOnline(false);
+    if (canConnect && isDriverOnline) {
+      if (!clientRef.current) {
+        connectSocket();
+      }
+    } else {
+      if (clientRef.current) {
+        disconnectSocket();
+      }
     }
-  }, [canConnect, authUser, connectSocket, disconnectSocket]);
+  }, [canConnect, isDriverOnline, connectSocket, disconnectSocket]);
 
   const goOnline = async () => {
     if (!canConnect) return;
     try {
       await updateDriverStatus(userId, "ACTIVE");
       setDriverOnline(true);
-      connectSocket();
     } catch (err) {
       console.error("failed to go online:", err);
     }
@@ -144,7 +166,6 @@ export const SocketProvider = ({ children }) => {
     try {
       await updateDriverStatus(userId, "INACTIVE");
       setDriverOnline(false);
-      disconnectSocket();
     } catch (err) {
       console.error("failed to go offline:", err);
     }

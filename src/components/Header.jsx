@@ -2,13 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import useAuthStore from "../contexts/AuthContext.jsx";
 import axios from "axios";
+import { useNotification } from "../contexts/NotificationContext.jsx";
+import { useSocket } from "../contexts/SocketContext.jsx";
 
 const Header = ({ onMenuClick }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  const { authUser, loading } = useAuthStore();
+  const { authUser, activeBooking, loading } = useAuthStore();
+  const { showToast } = useNotification();
+  const {connected} = useSocket();
 
+  useEffect(() => {
+    if (activeBooking != null && location.pathname !== "/ride-active") {
+      navigate("/ride-active");
+    }
+  }, [activeBooking, navigate]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -20,6 +29,38 @@ const Header = ({ onMenuClick }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (activeBooking) {
+        e.preventDefault();
+        e.returnValue = ""; // show default browser dialog
+        showToast(
+          "warn",
+          "Ride In Progress",
+          "You cannot leave the page while a ride is active."
+        );
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [activeBooking, showToast]);
+
+  // intercept navigation clicks manually
+  const handleProtectedNavigation = (e, path) => {
+    if (activeBooking && location.pathname !== "/ride-active") {
+      e.preventDefault();
+      showToast(
+        "warn",
+        "Ride In Progress",
+        "You cannot change pages while a ride is active."
+      );
+    } else {
+      navigate(path);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -43,7 +84,6 @@ const Header = ({ onMenuClick }) => {
       shadow-[0_4px_12px_rgba(255,215,0,0.1)] border-b
       border-gray-400 dark:border-yellow-600/30`}
     >
-
       <button
         onClick={onMenuClick}
         className="p-2 rounded-md border border-yellow-400 
@@ -53,7 +93,6 @@ const Header = ({ onMenuClick }) => {
         <i className="pi pi-bars text-xl text-yellow-500"></i>
       </button>
 
-
       <h1
         className="text-2xl font-bold tracking-wide 
         drop-shadow-[0_1px_3px_rgba(255,255,0,0.3)] 
@@ -62,12 +101,10 @@ const Header = ({ onMenuClick }) => {
         HeavyDriver
       </h1>
 
-
       <div className="relative" ref={dropdownRef}>
         {loading ? (
           <div className="text-gray-400 text-sm">Loading...</div>
         ) : authUser ? (
-
           <div className="flex flex-row items-center gap-4">
             <button
               onClick={() => setOpen((prev) => !prev)}
@@ -114,7 +151,6 @@ const Header = ({ onMenuClick }) => {
             )}
           </div>
         ) : (
-
           <div className="flex gap-3">
             <Link
               to="/login"

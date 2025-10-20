@@ -5,7 +5,6 @@ import DriverMap from "../maps/DriverMap";
 const RideDetailsOnMap = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    //simulate loading delay
     const timer = setTimeout(() => {
       setLoading(false);
     }, 300);

@@ -15,6 +15,7 @@ import Settings from "./components/pages/Settings.jsx";
 import MyRides from "./components/pages/MyRides.jsx";
 import ProtectedRoutes from "./routes/ProtectedRoutes.jsx";
 import RideNotificationManager from "./components/RideNotificationManager.jsx";
+import ActiveRide from "./components/pages/ActiveRide.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -36,6 +37,16 @@ function App() {
               </ProtectedRoutes>
             }
           />
+
+          <Route
+            path="/ride-active"
+            element={
+              <ProtectedRoutes>
+                <ActiveRide />
+              </ProtectedRoutes>
+            }
+          />
+
           <Route
             path="ride-details"
             element={

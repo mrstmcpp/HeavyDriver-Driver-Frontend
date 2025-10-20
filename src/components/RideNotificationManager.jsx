@@ -2,11 +2,14 @@ import React, { useEffect } from "react";
 import { eventEmitter } from "../utils/eventEmitter";
 import { useSocket } from "../contexts/SocketContext";
 import { useNotification } from "../contexts/NotificationContext";
+import useAuthStore from "../contexts/AuthContext";
+
 
 export default function RideNotificationManager() {
+  const {userId} = useAuthStore();
   const { clientRef, startRide, endRide } = useSocket();
   const { showNotification, showToast } = useNotification();
-
+  
   useEffect(() => {
     const handleRideRequest = (data) => {
       showNotification({
@@ -26,12 +29,12 @@ export default function RideNotificationManager() {
         onConfirm: () => {
           if (!clientRef.current) return;
           clientRef.current.send(
-            `/app/rideResponse/${data.passenger.id}`,
+            `/app/rideResponse/${userId}`,
             {},
             JSON.stringify({
               response: true,
               bookingId: data.bookingId,
-              driverId: data.driverId,
+              driverId: userId,
               passengerId: data.passenger.id,
             })
           );
@@ -40,12 +43,12 @@ export default function RideNotificationManager() {
         onDecline: () => {
           if (!clientRef.current) return;
           clientRef.current.send(
-            `/app/rideResponse/${data.passenger.id}`,
+            `/app/rideResponse/${userId}`,
             {},
             JSON.stringify({
               response: false,
               bookingId: data.bookingId,
-              driverId: data.driverId,
+              driverId: userId,
               passengerId: data.passenger.id,
             })
           );
