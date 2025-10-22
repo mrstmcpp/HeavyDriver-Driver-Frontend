@@ -1,25 +1,45 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuthStore from "../contexts/AuthContext.jsx";
 import axios from "axios";
 import { useNotification } from "../contexts/NotificationContext.jsx";
 import { useSocket } from "../contexts/SocketContext.jsx";
-import useBookingStore from "../contexts/BookingContext.jsx"
+import useBookingStore from "../contexts/BookingContext.jsx";
 
 const Header = ({ onMenuClick }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
   const { authUser, userId, loading } = useAuthStore();
-  const {activeBooking} = useBookingStore();
   const { showToast } = useNotification();
-  const {connected} = useSocket();
+  const { connected } = useSocket();
+
+  const activeBooking = useBookingStore((state) => state.activeBooking);
+  const fetchActiveBooking = useBookingStore((state) => state.fetchActiveBooking);
+  const loadingBooking = useBookingStore((state) => state.loadingBooking);
+
+  const fetchedOnce = useRef(false);
 
   useEffect(() => {
-    if (activeBooking != null && location.pathname !== "/ride-active") {
+    if (
+      !loading &&
+      userId &&
+      !loadingBooking &&
+      !activeBooking &&
+      !fetchedOnce.current
+    ) {
+      fetchedOnce.current = true;
+      fetchActiveBooking();
+    }
+  }, [loading, userId, loadingBooking, activeBooking, fetchActiveBooking]);
+
+  useEffect(() => {
+    if (activeBooking && location.pathname !== "/ride-active") {
       navigate("/ride-active");
     }
-  }, [activeBooking, navigate]);
+  }, [activeBooking, location.pathname, navigate]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -35,7 +55,7 @@ const Header = ({ onMenuClick }) => {
     const handleBeforeUnload = (e) => {
       if (activeBooking) {
         e.preventDefault();
-        e.returnValue = ""; // show default browser dialog
+        e.returnValue = "";
         showToast(
           "warn",
           "Ride In Progress",
@@ -44,13 +64,9 @@ const Header = ({ onMenuClick }) => {
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [activeBooking, showToast]);
 
-  // intercept navigation clicks manually
   const handleProtectedNavigation = (e, path) => {
     if (activeBooking && location.pathname !== "/ride-active") {
       e.preventDefault();
@@ -89,8 +105,8 @@ const Header = ({ onMenuClick }) => {
       <button
         onClick={onMenuClick}
         className="p-2 rounded-md border border-yellow-400 
-                  hover:bg-yellow-400/10 
-                  dark:border-gray-600 dark:hover:bg-gray-400/20"
+                hover:bg-yellow-400/10 
+                dark:border-gray-600 dark:hover:bg-gray-400/20"
       >
         <i className="pi pi-bars text-xl text-yellow-500"></i>
       </button>

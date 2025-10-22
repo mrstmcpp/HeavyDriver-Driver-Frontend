@@ -26,6 +26,21 @@ export default function RideNotificationManager() {
           fare: data.fare,
           passenger: data.passenger,
         },
+        // onSeeDetails: () => {
+        //   if (!clientRef.current) return;
+        //   clientRef.current.send(
+        //     `/app/rideResponse/${userId}`,
+        //     {},
+        //     JSON.stringify({
+        //       response: true,
+        //       bookingId: data.bookingId,
+        //       driverId: userId,
+        //       passengerId: data.passenger.id,
+        //     })
+        //   );
+        //   startRide(data.bookingId);
+        // },
+
         onConfirm: () => {
           if (!clientRef.current) return;
           clientRef.current.send(

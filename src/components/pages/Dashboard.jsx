@@ -5,50 +5,53 @@ import useAuthStore from "../../contexts/AuthContext.jsx";
 import BookingsTable from "../reusables/BookingsTable.jsx";
 
 const DashboardPage = () => {
-  const { authUser } = useAuthStore();
-  const [loading, setLoading] = useState(true);
+  const { authUser, loading: authLoading } = useAuthStore();
+  const [bookingsLoading, setBookingsLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
 
-  //wiill remove later
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 300);
+    if (authLoading) {
+      return;
+    }
 
-    return () => clearTimeout(timer);
-  }, []);
+    if (authUser && authUser.userId) {
+      const fetchBookings = async () => {
+        setBookingsLoading(true);
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_BOOKING_BACKEND_URL}/driver/${
+              authUser.userId
+            }/all-booking`
+          );
+          if (!res.ok) throw new Error("Failed to fetch bookings");
+          const data = await res.json();
+          console.log(data);
+          setBookings(data.bookingList || []);
+        } catch (err) {
+          console.error("Error fetching bookings:", err);
+        } finally {
+          setBookingsLoading(false);
+        }
+      };
 
-  console.log(authUser)
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_BOOKING_BACKEND_URL}/driver/${authUser.userId}/all-booking`
-        );
-        if (!res.ok) throw new Error("Failed to fetch bookings");
-        const data = await res.json();
-        console.log(data);
-        setBookings(data.bookingList || []);
-      } catch (err) {
-        console.error("Error fetching bookings:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      fetchBookings();
+    } else {
+      setBookingsLoading(false);
+    }
+  }, [authLoading, authUser]);
 
-    fetchBookings();
-  }, [authUser.userId]);
-
-  if (loading) {
+  if (authLoading || bookingsLoading) {
     return <CarLoader message="Loading your dashboard..." />;
   }
 
-
+  if (!authUser) {
+    return null;
+  }
 
   return (
-     <div
+    <div
       className="px-6 py-8 transition-colors duration-300
-                 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400"
+                bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400"
     >
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-wide mb-2">
@@ -62,7 +65,6 @@ const DashboardPage = () => {
         </p>
       </div>
 
-      {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="p-5 rounded-2xl bg-gradient-to-br from-yellow-400/10 via-yellow-400/5 to-transparent border border-yellow-500/30 shadow-md hover:shadow-yellow-500/10 transition">
           <h2 className="text-lg font-semibold mb-2">Earnings</h2>
@@ -80,17 +82,16 @@ const DashboardPage = () => {
           <p className="text-sm opacity-70 mt-1">Today</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-400/10 via-purple-400/5 to-transparent border border-purple-500/30 shadow-md hover:shadow-purple-500/10 transition">
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-400/10 via-purple-400/5 to-transparent border border-purple-500/30 shadow-md hover:shadow-purple-500/1D transition">
           <h2 className="text-lg font-semibold mb-2">Rating</h2>
           <p className="text-3xl font-bold text-purple-500">4.8 ★</p>
           <p className="text-sm opacity-70 mt-1">Based on 18 rides</p>
         </div>
       </div>
 
-      {/* Table */}
       <div className="mt-10">
         <h2 className="text-2xl font-semibold mb-4">Recent Activity</h2>
-        <BookingsTable bookings={bookings} loading={loading} />
+        <BookingsTable bookings={bookings} loading={bookingsLoading} />
       </div>
     </div>
   );

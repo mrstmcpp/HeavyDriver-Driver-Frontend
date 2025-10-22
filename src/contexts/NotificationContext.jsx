@@ -2,18 +2,20 @@ import React, { createContext, useContext, useRef, useState } from "react";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
 
 const NotificationContext = createContext();
 export const useNotification = () => useContext(NotificationContext);
 
 export const NotificationProvider = ({ children }) => {
   const toast = useRef(null);
+  const navigate = useNavigate(); // ✅ added
   const [notification, setNotification] = useState({
     visible: false,
     title: "",
-    message: "", // can be string or object
+    message: "",
     icon: "pi pi-info-circle",
-    type: "info", // info | success | warning | error | ride
+    type: "info",
     onConfirm: null,
     onDecline: null,
     confirmLabel: "Confirm",
@@ -46,6 +48,16 @@ export const NotificationProvider = ({ children }) => {
     notification?.onDecline?.();
     showToast("warn", "Declined", "Action was cancelled");
     hideNotification();
+  };
+
+  // ✅ Navigate to ride details page
+  const handleSeeRideDetails = () => {
+    hideNotification();
+    navigate("/ride/details", {
+      state: {
+        rideData: notification.message, // pass pickup, drop, fare, passenger
+      },
+    });
   };
 
   const typeColors = {
@@ -126,6 +138,12 @@ export const NotificationProvider = ({ children }) => {
         footer={
           notification.showActions && (
             <div className="flex justify-end gap-2 mt-3">
+              <Button
+                label="See Ride Details"
+                icon="pi pi-info-circle"
+                onClick={handleSeeRideDetails}
+                className="p-button-sm p-button-info"
+              />
               <Button
                 label={notification.confirmLabel || "Confirm"}
                 icon="pi pi-check"

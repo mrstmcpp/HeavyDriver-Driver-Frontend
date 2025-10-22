@@ -43,9 +43,9 @@ function App() {
             path="/ride-active"
             element={
               <ProtectedRoutes>
-                <RideActiveRoutes>
+
                   <ActiveRide />
-                </RideActiveRoutes>
+
               </ProtectedRoutes>
             }
           />
