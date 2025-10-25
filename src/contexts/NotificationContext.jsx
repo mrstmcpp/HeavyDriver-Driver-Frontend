@@ -50,12 +50,11 @@ export const NotificationProvider = ({ children }) => {
     hideNotification();
   };
 
-  // ✅ Navigate to ride details page
   const handleSeeRideDetails = () => {
     hideNotification();
-    navigate("/ride/details", {
+    navigate("/ride-details", {
       state: {
-        rideData: notification.message, // pass pickup, drop, fare, passenger
+        rideData: notification.message,
       },
     });
   };

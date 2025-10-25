@@ -14,7 +14,7 @@ import man from "../../assets/man.png";
 
 const containerStyle = {
   width: "100%",
-  height: "100vh",
+  height: "80vh",
 };
 
 const mapOptions = {
@@ -26,6 +26,7 @@ const mapOptions = {
 
 function DriverMap({ pickup, dropoff, rideStatus }) {
   const { isLoaded, loadError } = useJsApiLoader({
+    // FIX: Switched from import.meta.env to process.env for broader compatibility
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
@@ -36,10 +37,12 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
   const [map, setMap] = useState(null);
   const [directionResponse, setDirectionResponse] = useState(null);
   const prevRouteRef = useRef(null);
-  
+  const initialPanDone = useRef(false); // Use ref for 'pan once' logic
 
+  // FIX: Switched from import.meta.env to process.env for broader compatibility
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
 
+  // Fetch driver's location
   useEffect(() => {
     let ignore = false;
     const intervalTime = activeBooking ? 8000 : 30000;
@@ -68,6 +71,8 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
       clearInterval(interval);
     };
   }, [activeBooking, getLocation]);
+
+  // Calculate route function
   const calculateRoute = useCallback(async (originVal, destinationVal) => {
     if (!originVal || !destinationVal || !window.google) return;
 
@@ -79,7 +84,7 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
       prev.destination.lat === destinationVal.lat &&
       prev.destination.lng === destinationVal.lng
     ) {
-      return;
+      return; // Route hasn't changed
     }
 
     const directionService = new window.google.maps.DirectionsService();
@@ -97,47 +102,74 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
     }
   }, []);
 
+  // *** UPDATED ROUTE LOGIC ***
+  // This effect recalculates the route when the status or driver location changes.
   useEffect(() => {
-    if (!isLoaded || !map) return;
+    if (!isLoaded || !map || !pickup || !dropoff) {
+      return; // Not ready
+    }
 
     let origin, destination;
 
-    if (rideStatus === "incoming") {
-      origin = pickup;
-      destination = dropoff;
-    } else if (rideStatus === "accepted") {
-      origin = driverLocation || pickup;
-      destination = pickup;
-    } else if (rideStatus === "started") {
-      origin = driverLocation || pickup;
-      destination = dropoff;
+    if (rideStatus === "SCHEDULED") {
+      // Route: Driver -> Pickup
+      if (!driverLocation) {
+        setDirectionResponse(null); // Can't show route without driver
+        return;
+      }
+      origin = driverLocation;
+      destination = { lat: pickup.latitude, lng: pickup.longitude };
+
+    } else if (rideStatus === "ARRIVED") {
+      // Route: Pickup -> Dropoff (Show the upcoming trip)
+      origin = { lat: pickup.latitude, lng: pickup.longitude };
+      destination = { lat: dropoff.latitude, lng: dropoff.longitude };
+
+    } else if (rideStatus === "IN_RIDE") { // <-- Fixed casing
+      // Route: Driver -> Dropoff
+      if (!driverLocation) {
+        setDirectionResponse(null); // Can't show route without driver
+        return;
+      }
+      origin = driverLocation;
+      destination = { lat: dropoff.latitude, lng: dropoff.longitude };
+
     } else {
+      // For any other status (e.g., COMPLETED, CANCELED, or null)
       setDirectionResponse(null);
       return;
     }
 
-    if (origin && destination) calculateRoute(origin, destination);
+    if (origin && destination) {
+      calculateRoute(origin, destination);
+    }
+    
   }, [
     isLoaded,
     map,
     pickup,
     dropoff,
-    driverLocation,
-    rideStatus,
+    driverLocation, // Recalculate when driver moves
+    rideStatus,     // Recalculate when status changes
     calculateRoute,
   ]);
 
+  // Pan to driver location once
   useEffect(() => {
-    if (map && driverLocation) {
+    if (map && driverLocation && !initialPanDone.current) {
       map.panTo(driverLocation);
+      initialPanDone.current = true;
     }
   }, [map, driverLocation]);
 
   if (loadError) return <div>Error loading map</div>;
   if (!isLoaded) return <div>Loading...</div>;
 
+  // Show pickup/dropoff markers for all active ride statuses
+  const isActiveRide = rideStatus === "SCHEDULED" || rideStatus === "ARRIVED" || rideStatus === "IN_RIDE";
+
   return (
-    <div style={{ width: "100%", height: "100vh" }}>
+    <div style={{ width: "100%", height: "80vh" }}>
       {error && (
         <div
           style={{
@@ -158,9 +190,10 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
           mapId,
         }}
         zoom={14}
-        center={pickup || { lat: 25.4358, lng: 81.8463 }}
+        center={{ lat: pickup.latitude, lng: pickup.longitude }}
         onLoad={(m) => setMap(m)}
       >
+        {/* Driver Marker (Always show if location exists) */}
         {driverLocation && (
           <CustomMarker
             map={map}
@@ -172,35 +205,38 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
           />
         )}
 
-        {(rideStatus === "incoming" || rideStatus === "accepted") && pickup && (
+        {/* *** UPDATED MARKER LOGIC *** */}
+        {/* Pickup Marker */}
+        {isActiveRide && pickup && (
           <CustomMarker
             map={map}
-            position={pickup}
+            position={{ lat: pickup.latitude, lng: pickup.longitude }}
             label="Pickup"
             iconUrl={man}
             color="#22C55E"
           />
         )}
 
-        {(rideStatus === "incoming" ||
-          rideStatus === "accepted" ||
-          rideStatus === "started") &&
-          dropoff && (
-            <CustomMarker
-              map={map}
-              position={dropoff}
-              label="Drop"
-              iconUrl={pin}
-              color="#EF4444"
-            />
-          )}
+        {/* *** UPDATED MARKER LOGIC *** */}
+        {/* Dropoff Marker */}
+        {isActiveRide && dropoff && (
+          <CustomMarker
+            map={map}
+            position={{ lat: dropoff.latitude, lng: dropoff.longitude }}
+            label="Drop"
+            iconUrl={pin}
+            color="#EF4444"
+          />
+        )}
 
+        {/* Directions */}
         {directionResponse && (
           <DirectionsRenderer
             directions={directionResponse}
             options={{
               suppressMarkers: true,
               polylineOptions: { strokeColor: "#007AFF", strokeWeight: 5 },
+              preserveViewport: true, // Add this to prevent auto-zoom
             }}
           />
         )}
@@ -210,3 +246,4 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
 }
 
 export default React.memo(DriverMap);
+

@@ -30,11 +30,11 @@ const useBookingStore = create((set, get) => ({
 
       if (res.data) {
         set({
-          activeBooking: res.data,
+          activeBooking: res.data.bookingId,
           bookingStatus: res.data.bookingStatus,
         });
 
-        console.info(res.data)
+        // console.info(res.data)
         if (import.meta.env.DEV)
           console.log("Active booking fetched:", res.data);
       } else {
