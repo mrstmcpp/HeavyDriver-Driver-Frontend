@@ -36,16 +36,16 @@ export const SocketProvider = ({ children }) => {
           bookingId: data.bookingId,
           passenger: {
             id: data.passengerId || "Unknown",
-            name: data.passengerName || "Passenger",
+            name: data.fullName || "Passenger",
           },
           pickup: {
             address:
-              data.pickupLocation?.pickupAddress || "Address not available",
+              data.pickupLocation?.address || "Address not available",
             lat: data.pickupLocation?.latitude || 0,
             lng: data.pickupLocation?.longitude || 0,
           },
           drop: {
-            address: data.dropLocation?.dropAddress || "Address not available",
+            address: data.dropLocation?.address || "Address not available",
             lat: data.dropLocation?.latitude || 0,
             lng: data.dropLocation?.longitude || 0,
           },

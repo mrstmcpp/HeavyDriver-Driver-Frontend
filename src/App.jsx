@@ -16,7 +16,7 @@ import MyRides from "./components/pages/MyRides.jsx";
 import ProtectedRoutes from "./routes/ProtectedRoutes.jsx";
 import RideNotificationManager from "./components/RideNotificationManager.jsx";
 import ActiveRide from "./components/pages/ActiveRide.jsx";
-import RideActiveRoutes from "./routes/RideActiveRoutes.jsx";
+import RideManager from "./components/RideManager.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -28,6 +28,8 @@ function App() {
   return (
     <>
       <RideNotificationManager />
+      <RideManager />
+
       <Routes>
         <Route path="" element={<Layout />}>
           <Route

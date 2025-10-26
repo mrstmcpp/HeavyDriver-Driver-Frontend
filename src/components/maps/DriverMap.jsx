@@ -26,23 +26,19 @@ const mapOptions = {
 
 function DriverMap({ pickup, dropoff, rideStatus }) {
   const { isLoaded, loadError } = useJsApiLoader({
-    // FIX: Switched from import.meta.env to process.env for broader compatibility
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
-  const { location, error, getLocation } = useLocationStore();
+  const { error, getLocation } = useLocationStore();
   const { activeBooking } = useBookingStore();
 
   const [driverLocation, setDriverLocation] = useState(undefined);
   const [map, setMap] = useState(null);
   const [directionResponse, setDirectionResponse] = useState(null);
   const prevRouteRef = useRef(null);
-  const initialPanDone = useRef(false); // Use ref for 'pan once' logic
-
-  // FIX: Switched from import.meta.env to process.env for broader compatibility
+  const initialPanDone = useRef(false);
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
 
-  // Fetch driver's location
   useEffect(() => {
     let ignore = false;
     const intervalTime = activeBooking ? 8000 : 30000;
@@ -57,7 +53,7 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
           typeof newLoc.lng === "number"
         ) {
           setDriverLocation(newLoc);
-          console.log(" Updated driver location:", newLoc);
+          console.log("Updated driver location:", newLoc);
         }
       } catch (err) {
         console.error("Error fetching location:", err);
@@ -72,7 +68,6 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
     };
   }, [activeBooking, getLocation]);
 
-  // Calculate route function
   const calculateRoute = useCallback(async (originVal, destinationVal) => {
     if (!originVal || !destinationVal || !window.google) return;
 
@@ -84,7 +79,7 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
       prev.destination.lat === destinationVal.lat &&
       prev.destination.lng === destinationVal.lng
     ) {
-      return; // Route hasn't changed
+      return;
     }
 
     const directionService = new window.google.maps.DirectionsService();
@@ -102,59 +97,46 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
     }
   }, []);
 
-  // *** UPDATED ROUTE LOGIC ***
-  // This effect recalculates the route when the status or driver location changes.
   useEffect(() => {
-    if (!isLoaded || !map || !pickup || !dropoff) {
-      return; // Not ready
-    }
+    if (!isLoaded || !map || !pickup || !dropoff) return;
 
     let origin, destination;
 
-    if (rideStatus === "SCHEDULED") {
-      // Route: Driver -> Pickup
-      if (!driverLocation) {
-        setDirectionResponse(null); // Can't show route without driver
-        return;
+    if (rideStatus === "ASSIGNING_DRIVER") {
+      if (driverLocation) {
+        origin = driverLocation;
+        destination = { lat: pickup.latitude, lng: pickup.longitude };
+      } else {
+        setDirectionResponse(null);
+        map.panTo({ lat: pickup.latitude, lng: pickup.longitude });
       }
+    } else if (rideStatus === "SCHEDULED") {
+      if (!driverLocation) return setDirectionResponse(null);
       origin = driverLocation;
       destination = { lat: pickup.latitude, lng: pickup.longitude };
-
     } else if (rideStatus === "ARRIVED") {
-      // Route: Pickup -> Dropoff (Show the upcoming trip)
       origin = { lat: pickup.latitude, lng: pickup.longitude };
       destination = { lat: dropoff.latitude, lng: dropoff.longitude };
-
-    } else if (rideStatus === "IN_RIDE") { // <-- Fixed casing
-      // Route: Driver -> Dropoff
-      if (!driverLocation) {
-        setDirectionResponse(null); // Can't show route without driver
-        return;
-      }
+    } else if (rideStatus === "IN_RIDE") {
+      if (!driverLocation) return setDirectionResponse(null);
       origin = driverLocation;
       destination = { lat: dropoff.latitude, lng: dropoff.longitude };
-
     } else {
-      // For any other status (e.g., COMPLETED, CANCELED, or null)
       setDirectionResponse(null);
       return;
     }
 
-    if (origin && destination) {
-      calculateRoute(origin, destination);
-    }
-    
+    if (origin && destination) calculateRoute(origin, destination);
   }, [
     isLoaded,
     map,
     pickup,
     dropoff,
-    driverLocation, // Recalculate when driver moves
-    rideStatus,     // Recalculate when status changes
+    driverLocation,
+    rideStatus,
     calculateRoute,
   ]);
 
-  // Pan to driver location once
   useEffect(() => {
     if (map && driverLocation && !initialPanDone.current) {
       map.panTo(driverLocation);
@@ -165,8 +147,11 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
   if (loadError) return <div>Error loading map</div>;
   if (!isLoaded) return <div>Loading...</div>;
 
-  // Show pickup/dropoff markers for all active ride statuses
-  const isActiveRide = rideStatus === "SCHEDULED" || rideStatus === "ARRIVED" || rideStatus === "IN_RIDE";
+  const isActiveRide =
+    rideStatus === "ASSIGNING_DRIVER" ||
+    rideStatus === "SCHEDULED" ||
+    rideStatus === "ARRIVED" ||
+    rideStatus === "IN_RIDE";
 
   return (
     <div style={{ width: "100%", height: "80vh" }}>
@@ -185,15 +170,14 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
 
       <GoogleMap
         mapContainerStyle={containerStyle}
-        options={{
-          ...mapOptions,
-          mapId,
-        }}
+        options={{ ...mapOptions, mapId }}
         zoom={14}
-        center={{ lat: pickup.latitude, lng: pickup.longitude }}
+        center={{
+          lat: pickup?.latitude || 25.4358,
+          lng: pickup?.longitude || 81.8463,
+        }}
         onLoad={(m) => setMap(m)}
       >
-        {/* Driver Marker (Always show if location exists) */}
         {driverLocation && (
           <CustomMarker
             map={map}
@@ -205,8 +189,6 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
           />
         )}
 
-        {/* *** UPDATED MARKER LOGIC *** */}
-        {/* Pickup Marker */}
         {isActiveRide && pickup && (
           <CustomMarker
             map={map}
@@ -217,8 +199,6 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
           />
         )}
 
-        {/* *** UPDATED MARKER LOGIC *** */}
-        {/* Dropoff Marker */}
         {isActiveRide && dropoff && (
           <CustomMarker
             map={map}
@@ -229,14 +209,13 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
           />
         )}
 
-        {/* Directions */}
         {directionResponse && (
           <DirectionsRenderer
             directions={directionResponse}
             options={{
               suppressMarkers: true,
               polylineOptions: { strokeColor: "#007AFF", strokeWeight: 5 },
-              preserveViewport: true, // Add this to prevent auto-zoom
+              preserveViewport: true,
             }}
           />
         )}
@@ -246,4 +225,3 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
 }
 
 export default React.memo(DriverMap);
-

@@ -4,12 +4,11 @@ import { useSocket } from "../contexts/SocketContext";
 import { useNotification } from "../contexts/NotificationContext";
 import useAuthStore from "../contexts/AuthContext";
 
-
-export default function RideNotificationManager() {
-  const {userId} = useAuthStore();
+export default function RideNotificationManager({ onSeeDetails }) {
+  const { userId } = useAuthStore();
   const { clientRef, startRide, endRide } = useSocket();
   const { showNotification, showToast } = useNotification();
-  
+
   useEffect(() => {
     const handleRideRequest = (data) => {
       showNotification({
@@ -26,21 +25,9 @@ export default function RideNotificationManager() {
           fare: data.fare,
           passenger: data.passenger,
         },
-        // onSeeDetails: () => {
-        //   if (!clientRef.current) return;
-        //   clientRef.current.send(
-        //     `/app/rideResponse/${userId}`,
-        //     {},
-        //     JSON.stringify({
-        //       response: true,
-        //       bookingId: data.bookingId,
-        //       driverId: userId,
-        //       passengerId: data.passenger.id,
-        //     })
-        //   );
-        //   startRide(data.bookingId);
-        // },
-
+        onSeeDetails: () => {
+          onSeeDetails?.(); // 👈 call parent function
+        },
         onConfirm: () => {
           if (!clientRef.current) return;
           clientRef.current.send(
@@ -101,7 +88,7 @@ export default function RideNotificationManager() {
       eventEmitter.off("RIDE_STARTED", handleRideStarted);
       eventEmitter.off("RIDE_COMPLETED", handleRideCompleted);
     };
-  }, [clientRef, showNotification, showToast, startRide, endRide]);
+  }, [clientRef, showNotification, showToast, startRide, endRide, onSeeDetails]);
 
   return null;
 }

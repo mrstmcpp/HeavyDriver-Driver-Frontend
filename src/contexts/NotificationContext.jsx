@@ -9,7 +9,7 @@ export const useNotification = () => useContext(NotificationContext);
 
 export const NotificationProvider = ({ children }) => {
   const toast = useRef(null);
-  const navigate = useNavigate(); // ✅ added
+  const navigate = useNavigate();
   const [notification, setNotification] = useState({
     visible: false,
     title: "",
@@ -72,6 +72,7 @@ export const NotificationProvider = ({ children }) => {
 
     if (msg.type === "RIDE_REQUEST") {
       const { pickup, drop, fare, passenger } = msg;
+      console.log("Rendering ride request message:", msg);
       return (
         <div className="space-y-3 text-base leading-relaxed">
           <div>
@@ -137,12 +138,14 @@ export const NotificationProvider = ({ children }) => {
         footer={
           notification.showActions && (
             <div className="flex justify-end gap-2 mt-3">
-              <Button
-                label="See Ride Details"
-                icon="pi pi-info-circle"
-                onClick={handleSeeRideDetails}
-                className="p-button-sm p-button-info"
-              />
+              {notification.type === "ride" && (
+                <Button
+                  label="See Details"
+                  icon="pi pi-map-marker"
+                  onClick={handleSeeRideDetails}
+                  className="p-button-sm p-button-warning"
+                />
+              )}
               <Button
                 label={notification.confirmLabel || "Confirm"}
                 icon="pi pi-check"

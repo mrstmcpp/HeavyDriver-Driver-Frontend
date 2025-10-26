@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback , useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -9,20 +9,18 @@ import CarLoader from "../reusables/CarLoader.jsx";
 import { useNavigate } from "react-router-dom";
 import DriverMap from "../maps/DriverMap.jsx";
 import RideStatusButton from "../reusables/RideStatusButton.jsx";
-import { useNotification} from "../../contexts/NotificationContext.jsx"
+import { useNotification } from "../../contexts/NotificationContext.jsx";
 
 const ActiveRide = () => {
   const { userId, loading: authLoading } = useAuthStore();
-  const { activeBooking, clearActiveBooking } = useBookingStore();
+  const { activeBooking } = useBookingStore();
   const [rideDetails, setRideDetails] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
-  const [visible, setVisible] = useState(false); // OTP Modal visibility
+  const [visible, setVisible] = useState(false);
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const {showToast} = useNotification();
-  
-  
+  const { showToast } = useNotification();
 
   const navigate = useNavigate();
 
@@ -59,9 +57,9 @@ const ActiveRide = () => {
     setError("");
     try {
       await axios.put(
-        `${
-          import.meta.env.VITE_BOOKING_BACKEND_URL
-        }/${rideDetails.bookingId}/updateStatus`,
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/${
+          rideDetails.bookingId
+        }/updateStatus`,
         { driverId: userId, bookingStatus: "ARRIVED" }
       );
       setRideDetails((prev) => ({ ...prev, bookingStatus: "ARRIVED" }));
@@ -82,23 +80,23 @@ const ActiveRide = () => {
     setIsButtonLoading(true);
     setError("");
 
-      try {
-        await axios.put(
-          `${
-            import.meta.env.VITE_BOOKING_BACKEND_URL
-          }/${rideDetails.bookingId}/updateStatus`,
-          { driverId: userId, bookingStatus: "IN_RIDE", otp: otp }
-        );
-        // Fix: Update bookingStatus, not status
-        setRideDetails((prev) => ({ ...prev, bookingStatus: "IN_RIDE" }));
-        showToast("info", "Ride Started", "Be safe.");
-        setVisible(false);
-        setOtp("");
-      } catch (err) {
-        showToast("error", err.response.data.error, "Please try again.");
-        console.error("Failed to start ride:", err);
-        setError(err.response.data.error);
-      }
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/${
+          rideDetails.bookingId
+        }/updateStatus`,
+        { driverId: userId, bookingStatus: "IN_RIDE", otp: otp }
+      );
+      // Fix: Update bookingStatus, not status
+      setRideDetails((prev) => ({ ...prev, bookingStatus: "IN_RIDE" }));
+      showToast("info", "Ride Started", "Be safe.");
+      setVisible(false);
+      setOtp("");
+    } catch (err) {
+      showToast("error", err.response.data.error, "Please try again.");
+      console.error("Failed to start ride:", err);
+      setError(err.response.data.error);
+    }
     setIsButtonLoading(false);
   };
 
@@ -107,16 +105,17 @@ const ActiveRide = () => {
     setIsButtonLoading(true);
     setError("");
     try {
-      await axios.post(
-        `${
-          import.meta.env.VITE_BOOKING_BACKEND_URL
-        }/end-ride/${rideDetails.bookingId}`,
-        { userId }
+      await axios.put(
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/${
+          rideDetails.bookingId
+        }/updateStatus`,
+        { driverId: userId, bookingStatus: "COMPLETED" }
       );
-      clearActiveBooking();
-      navigate("/");
+      showToast("info", "Ride Ended", "Thank you for driving.");
+      window.location.href = "/";
     } catch (err) {
       console.error("Failed to end ride:", err);
+      showToast("error", err.response.data.error, "Please try again.");
       setError("Failed to end the ride. Please try again.");
       setIsButtonLoading(false);
     }
@@ -202,18 +201,24 @@ const ActiveRide = () => {
             <span className="text-yellow-400 font-semibold">Passenger:</span>{" "}
             <span className="text-gray-300">{passenger.name}</span>
           </p>
-          <p className="mb-2">
+          <p className="mb-3">
             <span className="text-yellow-400 font-semibold">Pickup:</span>{" "}
-            <span className="text-gray-300">
-              {pickup?.latitude}, {pickup?.longitude}
+            <span className="text-gray-300 block">
+              {pickup?.address
+                ? pickup.address
+                : `${pickup?.latitude}, ${pickup?.longitude}`}
             </span>
           </p>
-          <p className="mb-2">
+
+          <p className="mb-3">
             <span className="text-yellow-400 font-semibold">Dropoff:</span>{" "}
-            <span className="text-gray-300">
-              {dropoff?.latitude}, {dropoff?.longitude}
+            <span className="text-gray-300 block">
+              {dropoff?.address
+                ? dropoff.address
+                : `${dropoff?.latitude}, ${dropoff?.longitude}`}
             </span>
           </p>
+
           <p className="mb-2">
             <span className="text-yellow-400 font-semibold">Fare:</span>{" "}
             <span className="text-gray-300">₹{fare}</span>

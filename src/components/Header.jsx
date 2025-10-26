@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React,{ useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuthStore from "../contexts/AuthContext.jsx";
 import axios from "axios";
@@ -14,7 +14,6 @@ const Header = ({ onMenuClick }) => {
 
   const { authUser, userId, loading } = useAuthStore();
   const { showToast } = useNotification();
-  const { connected } = useSocket();
 
   const activeBooking = useBookingStore((state) => state.activeBooking);
   const fetchActiveBooking = useBookingStore((state) => state.fetchActiveBooking);
@@ -189,4 +188,4 @@ const Header = ({ onMenuClick }) => {
   );
 };
 
-export default Header;
+export default React.memo(Header);

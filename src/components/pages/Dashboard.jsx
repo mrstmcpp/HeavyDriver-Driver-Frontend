@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import CarLoader from "../reusables/CarLoader.jsx";
 import useAuthStore from "../../contexts/AuthContext.jsx";
 import BookingsTable from "../reusables/BookingsTable.jsx";
+import axios from "axios";
 
 const DashboardPage = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -21,7 +22,7 @@ const DashboardPage = () => {
           const res = await fetch(
             `${import.meta.env.VITE_BOOKING_BACKEND_URL}/driver/${
               authUser.userId
-            }/all-booking`
+            }/all-booking?pageSize=5`
           );
           if (!res.ok) throw new Error("Failed to fetch bookings");
           const data = await res.json();
@@ -47,6 +48,7 @@ const DashboardPage = () => {
   if (!authUser) {
     return null;
   }
+  
 
   return (
     <div
@@ -86,6 +88,12 @@ const DashboardPage = () => {
           <h2 className="text-lg font-semibold mb-2">Rating</h2>
           <p className="text-3xl font-bold text-purple-500">4.8 ★</p>
           <p className="text-sm opacity-70 mt-1">Based on 18 rides</p>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-400/10 via-purple-400/5 to-transparent border border-purple-500/30 shadow-md hover:shadow-purple-500/1D transition">
+          <h2 className="text-lg font-semibold mb-2">Test Section</h2>
+          <p className="text-3xl font-bold text-purple-500">Current Address</p>
+          <p className="text-sm opacity-70 mt-1">{}</p>
         </div>
       </div>
 
