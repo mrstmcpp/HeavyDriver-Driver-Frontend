@@ -187,7 +187,7 @@ const ActiveRide = () => {
 
   const pickup = rideDetails?.pickupLocation;
   const dropoff = rideDetails?.dropoffLocation;
-  const passenger = rideDetails?.passenger || { name: "Unknown" };
+  const passenger = rideDetails?.passengerName || { name: "Unknown" };
   const fare = rideDetails?.fare || 0;
 
   return (
@@ -199,7 +199,7 @@ const ActiveRide = () => {
           </h2>
           <p className="mb-2">
             <span className="text-yellow-400 font-semibold">Passenger:</span>{" "}
-            <span className="text-gray-300">{passenger.name}</span>
+            <span className="text-gray-300">{passenger}</span>
           </p>
           <p className="mb-3">
             <span className="text-yellow-400 font-semibold">Pickup:</span>{" "}
@@ -226,12 +226,10 @@ const ActiveRide = () => {
           <p className="mb-6">
             <span className="text-yellow-400 font-semibold">Status:</span>{" "}
             <span className="text-gray-300 capitalize">
-              {/* Fix: Use bookingStatus for display, as in your original code */}
               {rideDetails?.bookingStatus}
             </span>
           </p>
 
-          {/* Fix: Pass bookingStatus to the button component */}
           <RideStatusButton
             status={rideDetails?.bookingStatus}
             isLoading={isButtonLoading}

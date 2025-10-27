@@ -98,7 +98,7 @@ const RideDetailsOnMap = ({ rideRequest: rideRequestProp }) => {
             </p>
             <p className="mb-2">
               <span className="text-yellow-400 font-semibold">Passenger:</span>{" "}
-              <span className="text-gray-300">{passenger.name}</span>
+              <span className="text-gray-300">{passenger.passengerName}</span>
             </p>
             <p className="mb-2">
               <span className="text-yellow-400 font-semibold">
