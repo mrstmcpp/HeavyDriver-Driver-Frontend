@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import SockJS from "sockjs-client/dist/sockjs";
 import Stomp from "stompjs";
-import { updateDriverStatus } from "../api/mockApi.js";
 import useAuthStore from "./AuthContext.jsx";
 import { eventEmitter } from "../utils/eventEmitter";
 import { useNotification } from "./NotificationContext.jsx";

@@ -52,7 +52,7 @@ const SidebarComponent = ({ sidebarVisible, onHide }) => {
                 </li>
                 <li>
                   <Link
-                    to="/rides"
+                    to="/rides/all"
                     onClick={onHide}
                     className="flex items-center px-4 py-3 rounded-lg mx-2 hover:bg-yellow-600 hover:text-black transition-colors duration-200"
                   >

@@ -1,69 +1,59 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Button } from "primereact/button";
 
 const BookingsTable = ({ bookings = [], loading }) => {
-  if (loading) {
-    return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-300">
-        Loading bookings...
-      </div>
-    );
-  }
+  const navigate = useNavigate();
 
-  if (bookings.length === 0) {
-    return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-300">
-        No bookings found for today.
-      </div>
-    );
-  }
+  const dateTemplate = (rowData) =>
+    new Date(rowData.createdAt).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const earningsTemplate = () => (
+    <span className="text-yellow-500">
+      ₹{Math.floor(Math.random() * 300) + 100}
+    </span>
+  );
+
+  const statusTemplate = (rowData) => {
+    let colorClass = "text-gray-400";
+    if (rowData.status === "COMPLETED") colorClass = "text-green-500";
+    else if (rowData.status === "CANCELLED") colorClass = "text-red-400";
+    return <span className={`font-semibold ${colorClass}`}>{rowData.status}</span>;
+  };
+
+  const actionTemplate = (rowData) => (
+    <Button
+      label="View Details"
+      icon="pi pi-eye"
+      className="p-button-sm p-button-outlined p-button-secondary"
+      onClick={() => navigate(`/rides/details/${rowData.id}`)}
+    />
+  );
 
   return (
-    <div
-      className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 
-                 dark:border-gray-700 shadow-md overflow-hidden"
-    >
-      <table className="w-full text-left text-sm">
-        <thead className="bg-gray-100 dark:bg-gray-700">
-          <tr>
-            <th className="p-3">Booking ID</th>
-            <th className="p-3">Date</th>
-            <th className="p-3">Earnings</th>
-            <th className="p-3">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((booking) => (
-            <tr
-              key={booking.id}
-              className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition"
-            >
-              <td className="p-3">{booking.id}</td>
-              <td className="p-3">
-                {new Date(booking.createdAt).toLocaleString("en-IN", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </td>
-              {/* Mock earnings column for now */}
-              <td className="p-3 text-yellow-500">₹{Math.floor(Math.random() * 300) + 100}</td>
-              <td
-                className={`p-3 font-semibold ${
-                  booking.status === "COMPLETED"
-                    ? "text-green-500"
-                    : booking.status === "CANCELLED"
-                    ? "text-red-400"
-                    : "text-gray-400"
-                }`}
-              >
-                {booking.status}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="card rounded-2xl shadow-md ">
+      <DataTable
+        value={bookings}
+        loading={loading}
+        stripedRows
+        tableStyle={{ minWidth: "60rem" }}
+        
+        emptyMessage="No bookings found."
+      >
+        <Column field="id" header="ID" sortable style={{ width: "10%" }} />
+        <Column header="Date" body={dateTemplate} sortable style={{ width: "20%" }} />
+        <Column header="Earnings" body={earningsTemplate} style={{ width: "10%" }} />
+        <Column field="status" header="Status" body={statusTemplate} sortable style={{ width: "15%" }} />
+        <Column body={actionTemplate} header="Action" style={{ width: "15%" }} />
+      </DataTable>
     </div>
   );
 };

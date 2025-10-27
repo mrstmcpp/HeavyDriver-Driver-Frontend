@@ -9,6 +9,7 @@ const DashboardPage = () => {
   const { authUser, loading: authLoading } = useAuthStore();
   const [bookingsLoading, setBookingsLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     if (authLoading) {
@@ -22,12 +23,14 @@ const DashboardPage = () => {
           const res = await fetch(
             `${import.meta.env.VITE_BOOKING_BACKEND_URL}/driver/${
               authUser.userId
-            }/all-booking?pageSize=5`
+            }/today-booking?pageSize=5`
           );
           if (!res.ok) throw new Error("Failed to fetch bookings");
           const data = await res.json();
-          console.log(data);
+          // console.log(data);
           setBookings(data.bookingList || []);
+          setTotalItems(data.totalItems || 0);
+          
         } catch (err) {
           console.error("Error fetching bookings:", err);
         } finally {
@@ -79,7 +82,7 @@ const DashboardPage = () => {
         <div className="p-5 rounded-2xl bg-gradient-to-br from-green-400/10 via-green-400/5 to-transparent border border-green-500/30 shadow-md hover:shadow-green-500/10 transition">
           <h2 className="text-lg font-semibold mb-2">Completed Rides</h2>
           <p className="text-3xl font-bold text-green-500">
-            {bookings.filter((b) => b.status === "COMPLETED").length}
+            {totalItems}
           </p>
           <p className="text-sm opacity-70 mt-1">Today</p>
         </div>
@@ -98,7 +101,7 @@ const DashboardPage = () => {
       </div>
 
       <div className="mt-10">
-        <h2 className="text-2xl font-semibold mb-4">Recent Activity</h2>
+        <h2 className="text-2xl font-semibold mb-4">Today's Activity</h2>
         <BookingsTable bookings={bookings} loading={bookingsLoading} />
       </div>
     </div>

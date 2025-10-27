@@ -94,12 +94,12 @@ const Header = ({ onMenuClick }) => {
 
   return (
     <header
-      className={`flex items-center justify-between px-6 py-4 transition-colors duration-300
-      bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300
+      className={`sticky top-0 z-50 flex items-center justify-between px-6 py-4 transition-colors duration-300
+      bg-gradient-to-r
       dark:from-gray-900 dark:via-gray-800 dark:to-gray-700
-      text-gray-900 dark:text-yellow-400
+       dark:text-yellow-400
       shadow-[0_4px_12px_rgba(255,215,0,0.1)] border-b
-      border-gray-400 dark:border-yellow-600/30`}
+      border-gray-400`}
     >
       <button
         onClick={onMenuClick}

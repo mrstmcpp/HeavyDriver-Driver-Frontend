@@ -20,6 +20,7 @@ export default function RideNotificationManager({ onSeeDetails }) {
         declineLabel: "Decline",
         message: {
           type: "RIDE_REQUEST",
+          bookingId: data.bookingId,
           pickup: data.pickup,
           drop: data.drop,
           fare: data.fare,

@@ -51,6 +51,8 @@ const RideDetailsOnMap = ({ rideRequest: rideRequestProp }) => {
   const passenger = rideRequest.passenger || { name: "NULL" };
   const fare = rideRequest.fare || 120;
 
+  console.log(rideRequest)
+
   const handleAccept = () => {
     if (!clientRef.current) return;
     clientRef.current.send(

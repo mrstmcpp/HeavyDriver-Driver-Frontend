@@ -17,6 +17,7 @@ import ProtectedRoutes from "./routes/ProtectedRoutes.jsx";
 import RideNotificationManager from "./components/RideNotificationManager.jsx";
 import ActiveRide from "./components/pages/ActiveRide.jsx";
 import RideManager from "./components/RideManager.jsx";
+import RideDetailsPage from "./components/pages/RideDetailsPage.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -45,9 +46,7 @@ function App() {
             path="/ride-active"
             element={
               <ProtectedRoutes>
-
-                  <ActiveRide />
-
+                <ActiveRide />
               </ProtectedRoutes>
             }
           />
@@ -68,6 +67,16 @@ function App() {
               </ProtectedRoutes>
             }
           />
+
+          <Route
+            path="rides/details/:bookingId"
+            element={
+              <ProtectedRoutes>
+                <RideDetailsPage />
+              </ProtectedRoutes>
+            }
+          />
+
           <Route
             path="profile"
             element={
@@ -85,7 +94,7 @@ function App() {
             }
           />
           <Route
-            path="rides"
+            path="rides/all"
             element={
               <ProtectedRoutes>
                 <MyRides />
