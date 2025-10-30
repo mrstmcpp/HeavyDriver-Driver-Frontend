@@ -4,7 +4,7 @@ import { Paginator } from "primereact/paginator";
 import CarLoader from "../reusables/CarLoader.jsx";
 import useAuthStore from "../../contexts/AuthContext.jsx";
 import BookingsTable from "../reusables/BookingsTable.jsx";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta.jsx";
 
 const MyRides = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -75,19 +75,7 @@ const MyRides = () => {
 
   return (
     <>
-      <Helmet>
-        <title>My Rides | HeavyDriver — View All Your Trips</title>
-        <meta
-          name="description"
-          content="View your completed and upcoming rides, track history, and check ride details easily on HeavyDriver."
-        />
-        <meta property="og:title" content="My Rides | HeavyDriver" />
-        <meta
-          property="og:description"
-          content="Keep track of all your past and active rides in one place with HeavyDriver."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMeta page={"myRides"} />
 
       <div className="py-8 px-8 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
         <h1 className="text-3xl text-center font-bold mb-4">My Rides</h1>

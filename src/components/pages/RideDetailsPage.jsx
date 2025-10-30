@@ -4,7 +4,7 @@ import axios from "axios";
 import useAuthStore from "../../contexts/AuthContext.jsx";
 import userProfilePage from "../../assets/user.png";
 import DriverMap from "../maps/DriverMap.jsx";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta.jsx";
 
 const DriverRideDetails = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -98,19 +98,7 @@ const DriverRideDetails = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Ride Details | HeavyDriver — Trip Summary & Insights</title>
-        <meta
-          name="description"
-          content="View detailed trip summaries, fare breakdowns, and passenger information for each ride on HeavyDriver."
-        />
-        <meta property="og:title" content="Ride Details | HeavyDriver" />
-        <meta
-          property="og:description"
-          content="Review your trip details, fares, and performance insights with HeavyDriver."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMeta page={"rideDetails"} />
 
       <div className="px-6 text-white py-8">
         <div className="space-y-6">

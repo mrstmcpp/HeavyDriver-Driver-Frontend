@@ -11,6 +11,7 @@ import DriverMap from "../maps/DriverMap.jsx";
 import RideStatusButton from "../reusables/RideStatusButton.jsx";
 import { useNotification } from "../../contexts/NotificationContext.jsx";
 import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta.jsx";
 
 const ActiveRide = () => {
   const { userId, loading: authLoading } = useAuthStore();
@@ -193,13 +194,7 @@ const ActiveRide = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Active Ride | HeavyDriver — Drive Smart, Ride Safe</title>
-        <meta
-          name="description"
-          content="Track your ongoing rides in real-time. Stay updated, drive safe, and earn more with HeavyDriver."
-        />
-      </Helmet>
+      <PageMeta page={"activeRide"} />
       <div className="py-4 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="md:w-1/4 w-full bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col ">

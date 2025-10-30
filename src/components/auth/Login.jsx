@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../contexts/AuthContext";
 import axios from "axios";
 import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta";
 
 const Login = () => {
   const { authUser, setUser } = useAuthStore();
@@ -75,19 +76,7 @@ const Login = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Login | HeavyDriver — Access Your Account</title>
-        <meta
-          name="description"
-          content="Log in to your HeavyDriver account to manage your rides, track earnings, and stay connected with your passengers."
-        />
-        <meta property="og:title" content="Login | HeavyDriver" />
-        <meta
-          property="og:description"
-          content="Access your HeavyDriver account securely and get back on the road."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMeta page={"login"} />
 
       <div className="flex flex-col items-center justify-center py-50 bg-gray-900">
         <div className="bg-gray-800 p-6 rounded-2xl shadow-md w-96 border border-yellow-500">

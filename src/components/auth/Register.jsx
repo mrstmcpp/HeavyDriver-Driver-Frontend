@@ -4,6 +4,7 @@ import axios from "axios";
 import useAuthStore from "../../contexts/AuthContext";
 import { Toast } from "primereact/toast";
 import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta";
 
 const Register = () => {
   const { authUser, setUser } = useAuthStore();
@@ -97,19 +98,7 @@ const Register = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Login | HeavyDriver — Access Your Account</title>
-        <meta
-          name="description"
-          content="Log in to your HeavyDriver account to manage your rides, track earnings, and stay connected with your passengers."
-        />
-        <meta property="og:title" content="Login | HeavyDriver" />
-        <meta
-          property="og:description"
-          content="Access your HeavyDriver account securely and get back on the road."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMeta page={"register"} />
 
       <div className="flex flex-col items-center justify-center min-h-screen flex-grow bg-gray-900">
         <Toast ref={toast} />

@@ -4,6 +4,7 @@ import CarLoader from "../reusables/CarLoader";
 import { Button } from "primereact/button";
 import defaultDP from "../../assets/user.png";
 import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta";
 
 const Profile = () => {
   const [loading, setLoading] = useState(true);
@@ -43,19 +44,8 @@ const Profile = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Profile | HeavyDriver — Your Driver Identity</title>
-        <meta
-          name="description"
-          content="View and edit your driver profile, documents, and verification details securely on HeavyDriver."
-        />
-        <meta property="og:title" content="Profile | HeavyDriver" />
-        <meta
-          property="og:description"
-          content="Access and manage your driver profile, verification, and personal details on HeavyDriver."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMeta page={"profile"} />
+      
 
       <div className="px-6 flex justify-center items-center py-10 text-gray-100">
         <div className="relative w-full bg-gray-900 rounded-2xl shadow-2xl border border-yellow-500/20 p-8 overflow-hidden">
@@ -107,6 +97,7 @@ const Profile = () => {
             <InfoCard
               label="Approval"
               value={driver.driverApprovalStatus}
+              red={true}
               icon="pi pi-check-circle"
             />
             <InfoCard
@@ -145,14 +136,14 @@ const Profile = () => {
   );
 };
 
-const InfoCard = ({ label, value, icon }) => (
+const InfoCard = ({ label, value, icon, red }) => (
   <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/60 border border-gray-700 hover:border-yellow-400/50 transition-all duration-300">
     <div className="text-yellow-400 text-lg">
       <i className={icon}></i>
     </div>
     <div>
       <p className="text-sm text-gray-400">{label}</p>
-      <p className="font-semibold text-lg">{value}</p>
+      <p className={`font-semibold text-lg ${red ? "text-green-400" : ""}`}>{value}</p>
     </div>
   </div>
 );

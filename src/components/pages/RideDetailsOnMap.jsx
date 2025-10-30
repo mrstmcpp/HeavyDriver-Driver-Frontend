@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CarLoader from "../reusables/CarLoader";
 import DriverMap from "../maps/DriverMap";
@@ -9,52 +9,49 @@ import { Button } from "primereact/button";
 const RideDetailsOnMap = ({ rideRequest: rideRequestProp }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const rideRequest = rideRequestProp || location.state?.rideData;
+
+  // ✅ Always defined object — prevents conditional hook calls
+  const rideRequest = rideRequestProp || location.state?.rideData || {};
 
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(30);
   const { userId } = useAuthStore();
   const { clientRef, startRide } = useSocket();
 
+  // Simulate loading delay for smoother UI
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
 
-  // Countdown timer + redirect logic
+  // Countdown & redirect logic
   useEffect(() => {
-    if (!rideRequest) return;
+    if (!rideRequest?.bookingId) return;
 
     if (countdown === 0) {
-      navigate("/"); // redirect to home after 30 sec
+      navigate("/dashboard");
       return;
     }
 
-    const timer = setTimeout(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-
+    const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
     return () => clearTimeout(timer);
-  }, [countdown, rideRequest, navigate]);
+  }, [countdown, rideRequest?.bookingId, navigate]);
 
-  if (loading) return <CarLoader message="Loading your dashboard..." />;
+  // ✅ useMemo hooks always run, even with fallback
+  const pickup = useMemo(() => {
+    return rideRequest?.pickup || { lat: 25.437, lng: 81.842 };
+  }, [rideRequest?.pickup]);
 
-  if (!rideRequest)
-    return (
-      <div className="text-center text-red-500 mt-10">
-        Ride details not found.
-      </div>
-    );
+  const dropoff = useMemo(() => {
+    return rideRequest?.drop || { lat: 25.453, lng: 81.862 };
+  }, [rideRequest?.drop]);
 
-  const pickup = rideRequest.pickup || { lat: 25.437, lng: 81.842 };
-  const dropoff = rideRequest.drop || { lat: 25.453, lng: 81.862 };
-  const passenger = rideRequest.passenger || { name: "NULL" };
-  const fare = rideRequest.fare || 120;
-
-  console.log(rideRequest)
+  const passenger = rideRequest?.passenger || { passengerName: "Unknown" };
+  const fare = rideRequest?.fare || 120;
 
   const handleAccept = () => {
-    if (!clientRef.current) return;
+    if (!clientRef?.current || !rideRequest?.bookingId) return;
+
     clientRef.current.send(
       `/app/rideResponse/${userId}`,
       {},
@@ -65,11 +62,14 @@ const RideDetailsOnMap = ({ rideRequest: rideRequestProp }) => {
         passengerId: passenger.id,
       })
     );
+
     startRide(rideRequest.bookingId);
+    navigate("/ride-active");
   };
 
   const handleReject = () => {
-    if (!clientRef.current) return;
+    if (!clientRef?.current || !rideRequest?.bookingId) return;
+
     clientRef.current.send(
       `/app/rideResponse/${userId}`,
       {},
@@ -80,13 +80,27 @@ const RideDetailsOnMap = ({ rideRequest: rideRequestProp }) => {
         passengerId: passenger.id,
       })
     );
-    navigate("/"); // immediately redirect on reject
+
+    navigate("/dashboard");
   };
+
+  if (loading) {
+    return <CarLoader message="Loading your dashboard..." />;
+  }
+
+  // ✅ Prevent map render if rideRequest not loaded yet
+  if (!rideRequest?.bookingId) {
+    return (
+      <div className="text-center text-red-500 mt-10">
+        Ride details not found.
+      </div>
+    );
+  }
 
   return (
     <div className="py-8 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Left side - Ride details */}
+        {/* Left Section */}
         <div className="md:w-1/4 w-full bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col">
           <div>
             <h2 className="text-3xl text-center font-semibold text-yellow-400 mb-4">
@@ -126,7 +140,6 @@ const RideDetailsOnMap = ({ rideRequest: rideRequestProp }) => {
             </p>
           </div>
 
-          {/* Accept / Reject buttons */}
           <div className="flex gap-4 mt-4">
             <Button
               label="Accept"
@@ -143,11 +156,17 @@ const RideDetailsOnMap = ({ rideRequest: rideRequestProp }) => {
           </div>
         </div>
 
-        {/* Right side - Map */}
+        {/* Right Section (Map) */}
         <div className="flex-1 min-h-[400px] bg-gray-700 rounded-2xl overflow-hidden shadow-lg">
           <DriverMap
-            pickup={{ latitude: pickup.lat, longitude: pickup.lng }}
-            dropoff={{ latitude: dropoff.lat, longitude: dropoff.lng }}
+            pickup={{
+              latitude: pickup.lat,
+              longitude: pickup.lng,
+            }}
+            dropoff={{
+              latitude: dropoff.lat,
+              longitude: dropoff.lng,
+            }}
             rideStatus="ASSIGNING_DRIVER"
           />
         </div>

@@ -4,6 +4,7 @@ import useAuthStore from "../../contexts/AuthContext.jsx";
 import BookingsTable from "../reusables/BookingsTable.jsx";
 import axios from "axios";
 import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta.jsx";
 
 const DashboardPage = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -65,19 +66,7 @@ const DashboardPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Dashboard | HeavyDriver — Manage Rides & Earnings</title>
-        <meta
-          name="description"
-          content="Access your driver dashboard to manage rides, view history, and track your performance in real time with HeavyDriver."
-        />
-        <meta property="og:title" content="Dashboard | HeavyDriver" />
-        <meta
-          property="og:description"
-          content="Monitor your rides, earnings, and driving stats seamlessly with HeavyDriver Dashboard."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMeta page={"dashboard"} />
 
       <div
         className="px-6 py-8 transition-colors duration-300

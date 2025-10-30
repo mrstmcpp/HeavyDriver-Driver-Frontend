@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CarLoader from "../reusables/CarLoader";
 import { Helmet } from "react-helmet-async";
+import PageMeta from "../common/PageMeta";
 
 const Earnings = () => {
   const [loading, setLoading] = useState(true);
@@ -19,19 +20,7 @@ const Earnings = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Earnings | HeavyDriver — Track Your Income</title>
-        <meta
-          name="description"
-          content="Check your daily, weekly, and monthly earnings. Track performance, bonuses, and payouts easily with HeavyDriver."
-        />
-        <meta property="og:title" content="Earnings | HeavyDriver" />
-        <meta
-          property="og:description"
-          content="Stay on top of your income and performance. Track your progress with HeavyDriver."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMeta page={"earnings"} />
 
       <div className="px-6 py-8 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
         <h1 className="text-2xl font-bold mb-4">My Earnings</h1>

@@ -121,7 +121,7 @@ const Header = ({ onMenuClick }) => {
       </button>
 
       <h1
-        className={`text-2xl font-bold tracking-wide cursor-pointer ${
+        className={`text-4xl font-bold tracking-wide cursor-pointer ${
           connected ? "text-green-400" : "text-yellow-400"
         }`}
         onClick={() => navigate("/")}
