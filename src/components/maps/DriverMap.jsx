@@ -29,44 +29,14 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
-  const { error, getLocation } = useLocationStore();
+  const { location, error } = useLocationStore(); // ✅ now we just read from the store
   const { activeBooking } = useBookingStore();
 
-  const [driverLocation, setDriverLocation] = useState(undefined);
   const [map, setMap] = useState(null);
   const [directionResponse, setDirectionResponse] = useState(null);
   const prevRouteRef = useRef(null);
   const initialPanDone = useRef(false);
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
-
-  useEffect(() => {
-    let ignore = false;
-    const intervalTime = activeBooking ? 8000 : 30000;
-
-    const fetchLocation = async () => {
-      try {
-        const newLoc = await getLocation();
-        if (
-          !ignore &&
-          newLoc &&
-          typeof newLoc.lat === "number" &&
-          typeof newLoc.lng === "number"
-        ) {
-          setDriverLocation(newLoc);
-          console.log("Updated driver location:", newLoc);
-        }
-      } catch (err) {
-        console.error("Error fetching location:", err);
-      }
-    };
-
-    fetchLocation();
-    const interval = setInterval(fetchLocation, intervalTime);
-    return () => {
-      ignore = true;
-      clearInterval(interval);
-    };
-  }, [activeBooking, getLocation]);
 
   const calculateRoute = useCallback(async (originVal, destinationVal) => {
     if (!originVal || !destinationVal || !window.google) return;
@@ -103,23 +73,23 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
     let origin, destination;
 
     if (rideStatus === "ASSIGNING_DRIVER") {
-      if (driverLocation) {
-        origin = driverLocation;
+      if (location) {
+        origin = location;
         destination = { lat: pickup.latitude, lng: pickup.longitude };
       } else {
         setDirectionResponse(null);
         map.panTo({ lat: pickup.latitude, lng: pickup.longitude });
       }
     } else if (rideStatus === "SCHEDULED") {
-      if (!driverLocation) return setDirectionResponse(null);
-      origin = driverLocation;
+      if (!location) return setDirectionResponse(null);
+      origin = location;
       destination = { lat: pickup.latitude, lng: pickup.longitude };
     } else if (rideStatus === "ARRIVED") {
       origin = { lat: pickup.latitude, lng: pickup.longitude };
       destination = { lat: dropoff.latitude, lng: dropoff.longitude };
     } else if (rideStatus === "IN_RIDE") {
-      if (!driverLocation) return setDirectionResponse(null);
-      origin = driverLocation;
+      if (!location) return setDirectionResponse(null);
+      origin = location;
       destination = { lat: dropoff.latitude, lng: dropoff.longitude };
     } else {
       setDirectionResponse(null);
@@ -127,22 +97,14 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
     }
 
     if (origin && destination) calculateRoute(origin, destination);
-  }, [
-    isLoaded,
-    map,
-    pickup,
-    dropoff,
-    driverLocation,
-    rideStatus,
-    calculateRoute,
-  ]);
+  }, [isLoaded, map, pickup, dropoff, location, rideStatus, calculateRoute]);
 
   useEffect(() => {
-    if (map && driverLocation && !initialPanDone.current) {
-      map.panTo(driverLocation);
+    if (map && location && !initialPanDone.current) {
+      map.panTo(location);
       initialPanDone.current = true;
     }
-  }, [map, driverLocation]);
+  }, [map, location]);
 
   if (loadError) return <div>Error loading map</div>;
   if (!isLoaded) return <div>Loading...</div>;
@@ -178,10 +140,11 @@ function DriverMap({ pickup, dropoff, rideStatus }) {
         }}
         onLoad={(m) => setMap(m)}
       >
-        {driverLocation && (
+        {/* ✅ Show driver location */}
+        {location && (
           <CustomMarker
             map={map}
-            position={driverLocation}
+            position={location}
             label="You"
             iconUrl={drivercar}
             color="#3B82F6"

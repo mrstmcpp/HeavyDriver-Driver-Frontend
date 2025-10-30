@@ -43,7 +43,7 @@ const SidebarComponent = ({ sidebarVisible, onHide }) => {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    to="/"
+                    to="/dashboard"
                     onClick={onHide}
                     className="flex items-center px-4 py-3 rounded-lg mx-2 hover:bg-yellow-600 hover:text-black transition-colors duration-200"
                   >
@@ -101,7 +101,7 @@ const SidebarComponent = ({ sidebarVisible, onHide }) => {
             <Link
               to="/profile"
               onClick={onHide}
-              className="flex items-center space-x-3 p-3 rounded-lg bg-gray-800 hover:bg-yellow-600 hover:text-black transition-colors duration-200"
+              className="flex items-center space-x-3 p-3 rounded-lg bg-gray-800 hover:bg-gray-600 hover:text-black transition-colors duration-200"
             >
               <i className="pi pi-user text-3xl"></i>
               <div>

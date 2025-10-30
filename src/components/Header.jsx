@@ -1,10 +1,12 @@
-import React,{ useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuthStore from "../contexts/AuthContext.jsx";
 import axios from "axios";
 import { useNotification } from "../contexts/NotificationContext.jsx";
-import { useSocket } from "../contexts/SocketContext.jsx";
 import useBookingStore from "../contexts/BookingContext.jsx";
+import { useSocket } from "../contexts/SocketContext.jsx";
+import profilePic from "../assets/man2.png";
+import { Button } from "primereact/button";
 
 const Header = ({ onMenuClick }) => {
   const [open, setOpen] = useState(false);
@@ -16,10 +18,13 @@ const Header = ({ onMenuClick }) => {
   const { showToast } = useNotification();
 
   const activeBooking = useBookingStore((state) => state.activeBooking);
-  const fetchActiveBooking = useBookingStore((state) => state.fetchActiveBooking);
+  const fetchActiveBooking = useBookingStore(
+    (state) => state.fetchActiveBooking
+  );
   const loadingBooking = useBookingStore((state) => state.loadingBooking);
 
   const fetchedOnce = useRef(false);
+  const { connected } = useSocket();
 
   useEffect(() => {
     if (
@@ -99,22 +104,29 @@ const Header = ({ onMenuClick }) => {
       dark:from-gray-900 dark:via-gray-800 dark:to-gray-700
        dark:text-yellow-400
       shadow-[0_4px_12px_rgba(255,215,0,0.1)] border-b
-      border-gray-400`}
+      ${connected ? "border-green-400" : "border-yellow-400"}`}
     >
       <button
         onClick={onMenuClick}
-        className="p-2 rounded-md border border-yellow-400 
-                hover:bg-yellow-400/10 
-                dark:border-gray-600 dark:hover:bg-gray-400/20"
+        className={`p-2 rounded-md border ${
+          connected ? "border-green-400" : "border-yellow-400"
+        } 
+                hover:bg-yellow-400/10`}
       >
-        <i className="pi pi-bars text-xl text-yellow-500"></i>
+        <i
+          className={`pi pi-bars text-xl ${
+            connected ? "text-green-400" : "text-yellow-400"
+          }`}
+        ></i>
       </button>
 
       <h1
-        className="text-2xl font-bold tracking-wide 
-        drop-shadow-[0_1px_3px_rgba(255,255,0,0.3)] 
-        dark:drop-shadow-none"
+        className={`text-2xl font-bold tracking-wide cursor-pointer ${
+          connected ? "text-green-400" : "text-yellow-400"
+        }`}
+        onClick={() => navigate("/")}
       >
+
         HeavyDriver
       </h1>
 
@@ -128,13 +140,11 @@ const Header = ({ onMenuClick }) => {
               className="flex items-center gap-2 focus:outline-none hover:opacity-90 transition"
             >
               <img
-                src={
-                  authUser.profilePic ||
-                  "https://cdn-icons-png.flaticon.com/512/1535/1535791.png"
-                }
+                src={authUser.profilePic || profilePic}
                 alt="Driver DP"
-                className="w-10 h-10 rounded-full border-2 border-yellow-400 shadow-[0_0_6px_rgba(255,255,0,0.4)] 
-                dark:border-gray-600 dark:shadow-[0_0_6px_rgba(128,128,128,0.4)]"
+                className={`h-10 w-10 rounded-full border-3 ${
+                  connected ? "border-green-500" : "border-gray-500"
+                }`}
               />
               <i className="fa-solid fa-chevron-down text-yellow-400 dark:text-gray-900 text-lg"></i>
             </button>
@@ -169,18 +179,18 @@ const Header = ({ onMenuClick }) => {
           </div>
         ) : (
           <div className="flex gap-3">
-            <Link
-              to="/login"
-              className="px-4 py-2 bg-yellow-500 text-gray-900 font-semibold rounded-lg hover:bg-yellow-600 transition"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 border border-yellow-400 rounded-lg hover:bg-yellow-400/10 transition text-yellow-500"
-            >
-              Register
-            </Link>
+            <Button
+              label="Login"
+              icon="pi pi-sign-in"
+              className="p-button-outlined p-button-warning font-semibold"
+              onClick={() => navigate("/login")}
+            />
+            <Button
+              label="Sign Up"
+              icon="pi pi-user-plus"
+              className="p-button-warning font-semibold text-black"
+              onClick={() => navigate("/register")}
+            />
           </div>
         )}
       </div>

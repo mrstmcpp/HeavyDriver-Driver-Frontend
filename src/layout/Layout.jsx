@@ -3,6 +3,7 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import { Outlet } from "react-router-dom";
 import SidebarComponent from "../components/Sidebar.jsx";
+import Home from "../components/pages/Homepage.jsx";
 
 const Layout = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -14,7 +15,7 @@ const Layout = () => {
         sidebarVisible={sidebarVisible}
         onHide={() => setSidebarVisible(false)}
       />
-      <main className="flex-grow p-6">
+      <main className="flex-grow">
         <Outlet />
       </main>
 

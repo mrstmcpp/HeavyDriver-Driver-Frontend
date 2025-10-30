@@ -31,7 +31,7 @@ const BookingsTable = ({ bookings = [], loading }) => {
 
   const actionTemplate = (rowData) => (
     <Button
-      label="View Details"
+      label="View"
       icon="pi pi-eye"
       className="p-button-sm p-button-outlined p-button-secondary"
       onClick={() => navigate(`/rides/details/${rowData.id}`)}
@@ -39,12 +39,12 @@ const BookingsTable = ({ bookings = [], loading }) => {
   );
 
   return (
-    <div className="card rounded-2xl shadow-md ">
+    <div className="border ">
       <DataTable
         value={bookings}
         loading={loading}
         stripedRows
-        tableStyle={{ minWidth: "60rem" }}
+        tableStyle={{ minWidth: "50rem" }}
         
         emptyMessage="No bookings found."
       >
@@ -52,7 +52,7 @@ const BookingsTable = ({ bookings = [], loading }) => {
         <Column header="Date" body={dateTemplate} sortable style={{ width: "20%" }} />
         <Column header="Earnings" body={earningsTemplate} style={{ width: "10%" }} />
         <Column field="status" header="Status" body={statusTemplate} sortable style={{ width: "15%" }} />
-        <Column body={actionTemplate} header="Action" style={{ width: "15%" }} />
+        <Column body={actionTemplate} header="Action" style={{ width: "10%" }} />
       </DataTable>
     </div>
   );

@@ -1,11 +1,11 @@
 import axios from "axios";
 import { create } from "zustand";
-import useAuthStore from "./AuthContext";
+import useAuthStore from "./AuthContext.jsx";
 
 export const useLocationStore = create((set) => ({
   location: null,
   error: null,
-  loading: true,
+  loading: false,
 
   getLocation: async () => {
     if (!navigator.geolocation) {
@@ -45,7 +45,7 @@ export const useLocationStore = create((set) => ({
             console.log("Location posted successfully:", res.data);
           } catch (err) {
             console.error(
-              "Location posting failed:",
+              "❌ Location posting failed:",
               err.response?.data || err.message
             );
           }
@@ -56,6 +56,11 @@ export const useLocationStore = create((set) => ({
           console.error("Geolocation error:", error.message);
           set({ error: error.message, loading: false });
           reject(error);
+        },
+        {
+          enableHighAccuracy: true, 
+          timeout: 10000,           
+          maximumAge: 0,            
         }
       );
     });

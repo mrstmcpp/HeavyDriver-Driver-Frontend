@@ -9,7 +9,7 @@ const Login = () => {
 
   useEffect(() => {
     if (authUser) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [authUser, navigate]);
 
@@ -44,7 +44,7 @@ const Login = () => {
 
         if (user && userId && role) {
           setUser({ email: user, userId, role });
-          navigate("/");
+          navigate("/dashboard");
         } else {
 
           const validate = await axios.get(
@@ -58,7 +58,7 @@ const Login = () => {
               userId: validate.data.userId,
               role: validate.data.role,
             });
-            navigate("/");
+            navigate("/dashboard");
           } else {
             setError("Login successful, but token not validated.");
           }
@@ -75,7 +75,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
+    <div className="flex flex-col items-center justify-center py-50 bg-gray-900">
       <div className="bg-gray-800 p-6 rounded-2xl shadow-md w-96 border border-yellow-500">
         <h1 className="text-3xl font-bold text-center mb-6 text-yellow-400">
           Login

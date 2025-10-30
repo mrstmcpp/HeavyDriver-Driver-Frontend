@@ -18,14 +18,15 @@ import RideNotificationManager from "./components/RideNotificationManager.jsx";
 import ActiveRide from "./components/pages/ActiveRide.jsx";
 import RideManager from "./components/RideManager.jsx";
 import RideDetailsPage from "./components/pages/RideDetailsPage.jsx";
+import Home from "./components/pages/Homepage.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
-  const { checkAuth } = useAuthStore();
+  const { initializeAuth  } = useAuthStore();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    initializeAuth ();
+  }, [initializeAuth ]);
   return (
     <>
       <RideNotificationManager />
@@ -33,8 +34,10 @@ function App() {
 
       <Routes>
         <Route path="" element={<Layout />}>
+
+          <Route index element={<Home />} />
           <Route
-            path="/"
+            path="/dashboard"
             element={
               <ProtectedRoutes>
                 <DashboardPage />

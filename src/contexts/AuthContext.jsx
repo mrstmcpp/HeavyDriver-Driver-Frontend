@@ -17,17 +17,20 @@ const useAuthStore = create((set, get) => ({
       role: userData.role || null,
       userId: userData.userId || null,
     });
-    localStorage.setItem("user", JSON.stringify(userData)); // sstoring non-sensitive data
+    localStorage.setItem("user", JSON.stringify(userData));
   },
 
   initializeAuth: async () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) set({ authUser: storedUser });
+    if (storedUser) {
+      set({ authUser: storedUser, loading: true });
+      await get().checkAuth(); // ✅ validate after restoring
+    } else {
+      set({ authUser: null, loading: false });
+    }
   },
 
   checkAuth: async () => {
-    // console.log("checkAuth called");
-    set({ loading: true });
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_AUTH_BACKEND_URL}/validate`,
@@ -35,8 +38,6 @@ const useAuthStore = create((set, get) => ({
       );
 
       if (res.data?.loggedIn) {
-        // console.log("User is authenticated:", res.data);
-
         const userData = {
           email: res.data.user,
           name: res.data.name,
@@ -46,28 +47,30 @@ const useAuthStore = create((set, get) => ({
 
         set({
           authUser: userData,
-          loading: false,
           name: res.data.name,
           role: res.data.role,
           userId: res.data.userId,
+          loading: false,
         });
+        localStorage.setItem("user", JSON.stringify(userData));
       } else {
+        localStorage.removeItem("user");
         set({
           authUser: null,
-          loading: false,
-          userId: null,
           name: null,
           role: null,
+          userId: null,
+          loading: false,
         });
       }
-    } catch (err) {
-      console.error("Auth validation failed:", err.message);
+    } catch {
+      localStorage.removeItem("user");
       set({
         authUser: null,
         name: null,
         role: null,
-        loading: false,
         userId: null,
+        loading: false,
       });
     }
   },

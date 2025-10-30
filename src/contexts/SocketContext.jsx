@@ -11,21 +11,24 @@ import Stomp from "stompjs";
 import useAuthStore from "./AuthContext.jsx";
 import { eventEmitter } from "../utils/eventEmitter";
 import { useNotification } from "./NotificationContext.jsx";
+import { useLocationStore } from "./LocationContext.jsx";
+import useBookingStore from "./BookingContext.jsx";
 
 const SocketContext = createContext(null);
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
-  const [rideActive, setRideActive] = useState(false);
   const [isDriverOnline, setDriverOnline] = useState(false);
   const [currentRideId, setCurrentRideId] = useState(null);
   const { showToast } = useNotification();
 
-  const { authUser, userId, loading } = useAuthStore();
+  const { authUser, userId, loading: authLoading } = useAuthStore();
+  const { getLocation } = useLocationStore();
+  const { activeBooking, loadingBooking } = useBookingStore();
   const clientRef = useRef(null);
 
-  const canConnect = !!authUser && !!userId && !loading;
+  const canConnect = !!authUser && !!userId && !authLoading;
 
   const parseRideEvent = (data) => {
     switch (data.type) {
@@ -38,8 +41,7 @@ export const SocketProvider = ({ children }) => {
             name: data.fullName || "Passenger",
           },
           pickup: {
-            address:
-              data.pickupLocation?.address || "Address not available",
+            address: data.pickupLocation?.address || "Address not available",
             lat: data.pickupLocation?.latitude || 0,
             lng: data.pickupLocation?.longitude || 0,
           },
@@ -50,26 +52,16 @@ export const SocketProvider = ({ children }) => {
           },
           fare: data.fare || 0,
         };
-
       case "RIDE_CANCELLED":
         return {
           event: "RIDE_CANCELLED",
           bookingId: data.bookingId,
           reason: data.reason || "Passenger cancelled the ride.",
         };
-
       case "RIDE_STARTED":
-        return {
-          event: "RIDE_STARTED",
-          bookingId: data.bookingId,
-        };
-
+        return { event: "RIDE_STARTED", bookingId: data.bookingId };
       case "RIDE_COMPLETED":
-        return {
-          event: "RIDE_COMPLETED",
-          bookingId: data.bookingId,
-        };
-
+        return { event: "RIDE_COMPLETED", bookingId: data.bookingId };
       default:
         console.warn("Unknown message type:", data.type);
         return null;
@@ -87,7 +79,9 @@ export const SocketProvider = ({ children }) => {
 
     stompClient.connect({}, () => {
       setConnected(true);
-      showToast("success", "You are online now.", "Ready for ride.");
+      if (!clientRef.current && !activeBooking) {
+        showToast("success", "You are online now.", "Ready to accept ride.");
+      }
       clientRef.current = stompClient;
 
       const topic = `/topic/driver/${userId}`;
@@ -110,11 +104,7 @@ export const SocketProvider = ({ children }) => {
 
       setTimeout(() => {
         if (canConnect && isDriverOnline) {
-          showToast(
-            "error",
-            "Disconnected.",
-            "Attempting to reconnect."
-          );
+          showToast("error", "Disconnected.", "Attempting to reconnect.");
           console.log("Attempting to reconnect...");
           connectSocket();
         }
@@ -125,7 +115,6 @@ export const SocketProvider = ({ children }) => {
   const disconnectSocket = useCallback(() => {
     if (clientRef.current) {
       clientRef.current.disconnect(() => {
-        console.log("Disconnected from socket");
         setConnected(false);
         showToast(
           "info",
@@ -135,59 +124,76 @@ export const SocketProvider = ({ children }) => {
         clientRef.current = null;
       });
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
+    if (activeBooking && !isDriverOnline && !loadingBooking) {
+      console.log("Active booking found, forcing driver online...");
+      setDriverOnline(true);
+    }
+  }, [activeBooking, loadingBooking, isDriverOnline]);
+
+  // Manage socket connection
+  useEffect(() => {
     if (canConnect && isDriverOnline) {
-      if (!clientRef.current) {
-        connectSocket();
-      }
+      if (!clientRef.current) connectSocket();
     } else {
-      if (clientRef.current) {
-        disconnectSocket();
-      }
+      if (clientRef.current) disconnectSocket();
     }
   }, [canConnect, isDriverOnline, connectSocket, disconnectSocket]);
 
+  // Periodic location updates
+  useEffect(() => {
+    if (!connected || !isDriverOnline || loadingBooking) return;
+
+    let interval;
+    const updateLocation = async () => {
+      try {
+        await getLocation();
+        console.log(
+          `Driver location updated (every ${
+            activeBooking ? 8 : 30
+          }s) [activeBooking=${activeBooking ? "YES" : "NO"}]`
+        );
+      } catch (err) {
+        console.error("Failed to update location:", err.message);
+      }
+    };
+
+    updateLocation();
+    const intervalTime = activeBooking ? 8000 : 30000;
+    interval = setInterval(updateLocation, intervalTime);
+
+    return () => clearInterval(interval);
+  }, [connected, isDriverOnline, loadingBooking, activeBooking, getLocation]);
+
   const goOnline = async () => {
     if (!canConnect) return;
-    try {
-      setDriverOnline(true);
-    } catch (err) {
-      console.error("failed to go online:", err);
-    }
+    setDriverOnline(true);
   };
 
   const goOffline = async () => {
-    if (!userId) return;
-    try {
-      setDriverOnline(false);
-    } catch (err) {
-      console.error("failed to go offline:", err);
+    if (activeBooking) {
+      showToast(
+        "warn",
+        "Ride in progress!",
+        "You cannot go offline during an active ride."
+      );
+      return;
     }
-  };
-
-  const startRide = (rideId) => {
-    setCurrentRideId(rideId);
-    setRideActive(true);
-  };
-
-  const endRide = () => {
-    setCurrentRideId(null);
-    setRideActive(false);
+    setDriverOnline(false);
   };
 
   return (
     <SocketContext.Provider
       value={{
         connected,
-        rideActive,
         isDriverOnline,
+        activeBooking,
+        loadingBooking,
         clientRef,
         goOnline,
         goOffline,
-        startRide,
-        endRide,
       }}
     >
       {children}

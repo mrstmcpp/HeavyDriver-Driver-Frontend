@@ -238,7 +238,7 @@ const DriverRideDetails = () => {
       {/* CTA Buttons */}
       <div className="text-center mt-10 flex flex-col sm:flex-row gap-4 justify-center">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
           className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 px-8 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
         >
           <i className="pi pi-home" />
