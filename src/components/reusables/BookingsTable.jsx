@@ -39,7 +39,7 @@ const BookingsTable = ({ bookings = [], loading }) => {
   );
 
   return (
-    <div className="border ">
+    <div className="rounded-lg overflow-hidden shadow-md border border-gray-700">
       <DataTable
         value={bookings}
         loading={loading}

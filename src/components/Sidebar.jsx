@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import DriverStatusButton from "./reusables/DriverStatusButton.jsx";
@@ -7,6 +7,7 @@ import axios from "axios";
 
 const SidebarComponent = ({ sidebarVisible, onHide }) => {
   const { authUser, loading } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -28,8 +29,8 @@ const SidebarComponent = ({ sidebarVisible, onHide }) => {
     >
       <div className="flex flex-col h-full">
         <div>
-          <div className="flex items-center justify-center h-20 bg-yellow-500 mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">HeavyDriver</h1>
+          <div className="flex items-center justify-center h-20 bg-yellow-500 mb-4 rounded-2xl" onClick={() => navigate("/")}>
+            <h1 className="text-2xl font-bold text-gray-900 cursor-pointer">HeavyDriver</h1>
           </div>
 
 

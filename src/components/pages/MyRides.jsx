@@ -4,6 +4,7 @@ import { Paginator } from "primereact/paginator";
 import CarLoader from "../reusables/CarLoader.jsx";
 import useAuthStore from "../../contexts/AuthContext.jsx";
 import BookingsTable from "../reusables/BookingsTable.jsx";
+import { Helmet } from "react-helmet-async";
 
 const MyRides = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -73,22 +74,38 @@ const MyRides = () => {
   }
 
   return (
-    <div className="py-8 px-8 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
-      <h1 className="text-3xl text-center font-bold mb-4">My Rides</h1>
-      <p className="text-sm opacity-80 mb-6">Total Rides: {totalItems}</p>
-
-      <BookingsTable bookings={bookings} loading={bookingsLoading} />
-
-      <div className="flex justify-center mt-6">
-        <Paginator
-          first={first}
-          rows={rows}
-          totalRecords={totalItems}
-          rowsPerPageOptions={[10, 20 , 30]}
-          onPageChange={onPageChange}
+    <>
+      <Helmet>
+        <title>My Rides | HeavyDriver — View All Your Trips</title>
+        <meta
+          name="description"
+          content="View your completed and upcoming rides, track history, and check ride details easily on HeavyDriver."
         />
+        <meta property="og:title" content="My Rides | HeavyDriver" />
+        <meta
+          property="og:description"
+          content="Keep track of all your past and active rides in one place with HeavyDriver."
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
+      <div className="py-8 px-8 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
+        <h1 className="text-3xl text-center font-bold mb-4">My Rides</h1>
+        <p className="text-sm opacity-80 mb-6">Total Rides: {totalItems}</p>
+
+        <BookingsTable bookings={bookings} loading={bookingsLoading} />
+
+        <div className="flex justify-center mt-6">
+          <Paginator
+            first={first}
+            rows={rows}
+            totalRecords={totalItems}
+            rowsPerPageOptions={[10, 20, 30]}
+            onPageChange={onPageChange}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -7,10 +7,12 @@ import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { PrimeReactProvider } from "primereact/api";
 import { SocketProvider } from "./contexts/SocketContext.jsx";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
+import { HelmetProvider } from "react-helmet-async";
 
 createRoot(document.getElementById("root")).render(
-    <BrowserRouter>
-      <PrimeReactProvider>
+  <BrowserRouter>
+    <PrimeReactProvider>
+      <HelmetProvider>
         <NotificationProvider>
           <SocketProvider>
             <ThemeProvider>
@@ -18,6 +20,7 @@ createRoot(document.getElementById("root")).render(
             </ThemeProvider>
           </SocketProvider>
         </NotificationProvider>
-      </PrimeReactProvider>
-    </BrowserRouter>
+      </HelmetProvider>
+    </PrimeReactProvider>
+  </BrowserRouter>
 );

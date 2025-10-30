@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../contexts/AuthContext";
 import axios from "axios";
+import { Helmet } from "react-helmet-async";
 
 const Login = () => {
   const { authUser, setUser } = useAuthStore();
@@ -39,14 +40,12 @@ const Login = () => {
       );
 
       if (response.data.success) {
-
         const { user, userId, role } = response.data;
 
         if (user && userId && role) {
           setUser({ email: user, userId, role });
           navigate("/dashboard");
         } else {
-
           const validate = await axios.get(
             `${import.meta.env.VITE_AUTH_BACKEND_URL}/validate`,
             { withCredentials: true }
@@ -75,53 +74,71 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-50 bg-gray-900">
-      <div className="bg-gray-800 p-6 rounded-2xl shadow-md w-96 border border-yellow-500">
-        <h1 className="text-3xl font-bold text-center mb-6 text-yellow-400">
-          Login
-        </h1>
+    <>
+      <Helmet>
+        <title>Login | HeavyDriver — Access Your Account</title>
+        <meta
+          name="description"
+          content="Log in to your HeavyDriver account to manage your rides, track earnings, and stay connected with your passengers."
+        />
+        <meta property="og:title" content="Login | HeavyDriver" />
+        <meta
+          property="og:description"
+          content="Access your HeavyDriver account securely and get back on the road."
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+      <div className="flex flex-col items-center justify-center py-50 bg-gray-900">
+        <div className="bg-gray-800 p-6 rounded-2xl shadow-md w-96 border border-yellow-500">
+          <h1 className="text-3xl font-bold text-center mb-6 text-yellow-400">
+            Login
+          </h1>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 py-2 rounded-md font-semibold transition-colors"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 py-2 rounded-md font-semibold transition-colors"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

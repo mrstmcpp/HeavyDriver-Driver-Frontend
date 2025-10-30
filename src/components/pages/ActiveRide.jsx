@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import DriverMap from "../maps/DriverMap.jsx";
 import RideStatusButton from "../reusables/RideStatusButton.jsx";
 import { useNotification } from "../../contexts/NotificationContext.jsx";
+import { Helmet } from "react-helmet-async";
 
 const ActiveRide = () => {
   const { userId, loading: authLoading } = useAuthStore();
@@ -191,104 +192,113 @@ const ActiveRide = () => {
   const fare = rideDetails?.fare || 0;
 
   return (
-    <div className="py-4 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="md:w-1/4 w-full bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col ">
-          <h2 className="text-3xl text-center font-semibold text-yellow-400 mb-4">
-            Active Ride
-          </h2>
-          <p className="mb-2">
-            <span className="text-yellow-400 font-semibold">Passenger:</span>{" "}
-            <span className="text-gray-300">{passenger}</span>
-          </p>
-          <p className="mb-3">
-            <span className="text-yellow-400 font-semibold">Pickup:</span>{" "}
-            <span className="text-gray-300 block">
-              {pickup?.address
-                ? pickup.address
-                : `${pickup?.latitude}, ${pickup?.longitude}`}
-            </span>
-          </p>
-
-          <p className="mb-3">
-            <span className="text-yellow-400 font-semibold">Dropoff:</span>{" "}
-            <span className="text-gray-300 block">
-              {dropoff?.address
-                ? dropoff.address
-                : `${dropoff?.latitude}, ${dropoff?.longitude}`}
-            </span>
-          </p>
-
-          <p className="mb-2">
-            <span className="text-yellow-400 font-semibold">Fare:</span>{" "}
-            <span className="text-gray-300">₹{fare}</span>
-          </p>
-          <p className="mb-6">
-            <span className="text-yellow-400 font-semibold">Status:</span>{" "}
-            <span className="text-gray-300 capitalize">
-              {rideDetails?.bookingStatus}
-            </span>
-          </p>
-
-          <RideStatusButton
-            status={rideDetails?.bookingStatus}
-            isLoading={isButtonLoading}
-            onMarkArrived={handleMarkArrived}
-            onStartRideClick={() => setVisible(true)}
-            onEndRide={handleEndRide}
-          />
-
-          {error && !visible && (
-            <p className="text-red-500 mt-3 text-sm font-medium text-center">
-              {error}
+    <>
+      <Helmet>
+        <title>Active Ride | HeavyDriver — Drive Smart, Ride Safe</title>
+        <meta
+          name="description"
+          content="Track your ongoing rides in real-time. Stay updated, drive safe, and earn more with HeavyDriver."
+        />
+      </Helmet>
+      <div className="py-4 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-yellow-400">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="md:w-1/4 w-full bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col ">
+            <h2 className="text-3xl text-center font-semibold text-yellow-400 mb-4">
+              Active Ride
+            </h2>
+            <p className="mb-2">
+              <span className="text-yellow-400 font-semibold">Passenger:</span>{" "}
+              <span className="text-gray-300">{passenger}</span>
             </p>
-          )}
+            <p className="mb-3">
+              <span className="text-yellow-400 font-semibold">Pickup:</span>{" "}
+              <span className="text-gray-300 block">
+                {pickup?.address
+                  ? pickup.address
+                  : `${pickup?.latitude}, ${pickup?.longitude}`}
+              </span>
+            </p>
+
+            <p className="mb-3">
+              <span className="text-yellow-400 font-semibold">Dropoff:</span>{" "}
+              <span className="text-gray-300 block">
+                {dropoff?.address
+                  ? dropoff.address
+                  : `${dropoff?.latitude}, ${dropoff?.longitude}`}
+              </span>
+            </p>
+
+            <p className="mb-2">
+              <span className="text-yellow-400 font-semibold">Fare:</span>{" "}
+              <span className="text-gray-300">₹{fare}</span>
+            </p>
+            <p className="mb-6">
+              <span className="text-yellow-400 font-semibold">Status:</span>{" "}
+              <span className="text-gray-300 capitalize">
+                {rideDetails?.bookingStatus}
+              </span>
+            </p>
+
+            <RideStatusButton
+              status={rideDetails?.bookingStatus}
+              isLoading={isButtonLoading}
+              onMarkArrived={handleMarkArrived}
+              onStartRideClick={() => setVisible(true)}
+              onEndRide={handleEndRide}
+            />
+
+            {error && !visible && (
+              <p className="text-red-500 mt-3 text-sm font-medium text-center">
+                {error}
+              </p>
+            )}
+          </div>
+
+          <div className="flex-1 min-h-[400px] bg-gray-700 rounded-2xl overflow-hidden shadow-lg">
+            {/* Fix: Pass bookingStatus to the map component */}
+            <DriverMap
+              pickup={pickup}
+              dropoff={dropoff}
+              rideStatus={rideDetails?.bookingStatus}
+            />
+          </div>
         </div>
 
-        <div className="flex-1 min-h-[400px] bg-gray-700 rounded-2xl overflow-hidden shadow-lg">
-          {/* Fix: Pass bookingStatus to the map component */}
-          <DriverMap
-            pickup={pickup}
-            dropoff={dropoff}
-            rideStatus={rideDetails?.bookingStatus}
-          />
-        </div>
+        <Dialog
+          header="Enter OTP to Start Ride"
+          visible={visible}
+          style={{ width: "25rem", background: "#111" }}
+          onHide={() => {
+            if (isButtonLoading) return;
+            setVisible(false);
+            setError("");
+            setOtp("");
+          }}
+          modal
+          footer={footerContent}
+          contentClassName="bg-black text-yellow-400"
+          headerClassName="bg-zinc-900 text-yellow-400"
+        >
+          <div className="flex flex-col justify-center items-center mt-2">
+            <p className="text-zinc-400 mb-3 text-center">
+              Please enter the 4-digit OTP provided by the rider.
+            </p>
+
+            <InputOtp
+              value={otp}
+              onChange={(e) => setOtp(e.value)}
+              length={4}
+              inputTemplate={otpInputTemplate}
+              style={{ gap: 0 }}
+            />
+
+            {error && (
+              <p className="text-red-500 mt-3 text-sm font-medium">{error}</p>
+            )}
+          </div>
+        </Dialog>
       </div>
-
-      <Dialog
-        header="Enter OTP to Start Ride"
-        visible={visible}
-        style={{ width: "25rem", background: "#111" }}
-        onHide={() => {
-          if (isButtonLoading) return;
-          setVisible(false);
-          setError("");
-          setOtp("");
-        }}
-        modal
-        footer={footerContent}
-        contentClassName="bg-black text-yellow-400"
-        headerClassName="bg-zinc-900 text-yellow-400"
-      >
-        <div className="flex flex-col justify-center items-center mt-2">
-          <p className="text-zinc-400 mb-3 text-center">
-            Please enter the 4-digit OTP provided by the rider.
-          </p>
-
-          <InputOtp
-            value={otp}
-            onChange={(e) => setOtp(e.value)}
-            length={4}
-            inputTemplate={otpInputTemplate}
-            style={{ gap: 0 }}
-          />
-
-          {error && (
-            <p className="text-red-500 mt-3 text-sm font-medium">{error}</p>
-          )}
-        </div>
-      </Dialog>
-    </div>
+    </>
   );
 };
 

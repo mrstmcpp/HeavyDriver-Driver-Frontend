@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import useAuthStore from "../../contexts/AuthContext";
 import { Toast } from "primereact/toast";
+import { Helmet } from "react-helmet-async";
 
 const Register = () => {
   const { authUser, setUser } = useAuthStore();
@@ -12,7 +13,7 @@ const Register = () => {
       navigate("/");
     }
   }, [authUser, navigate]);
-  
+
   const toast = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -95,135 +96,151 @@ const Register = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen flex-grow bg-gray-900">
-      <Toast ref={toast} />
-      <div className="bg-gray-800 p-6 rounded-2xl shadow-md w-96 border border-yellow-500">
-        <h1 className="text-3xl font-bold text-center mb-6 text-yellow-400">
-          Register a New Driver
-        </h1>
+    <>
+      <Helmet>
+        <title>Login | HeavyDriver — Access Your Account</title>
+        <meta
+          name="description"
+          content="Log in to your HeavyDriver account to manage your rides, track earnings, and stay connected with your passengers."
+        />
+        <meta property="og:title" content="Login | HeavyDriver" />
+        <meta
+          property="og:description"
+          content="Access your HeavyDriver account securely and get back on the road."
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+      <div className="flex flex-col items-center justify-center min-h-screen flex-grow bg-gray-900">
+        <Toast ref={toast} />
+        <div className="bg-gray-800 p-6 rounded-2xl shadow-md w-96 border border-yellow-500">
+          <h1 className="text-3xl font-bold text-center mb-6 text-yellow-400">
+            Register a New Driver
+          </h1>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          {/* Aadhar */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Aadhar Card Number
-            </label>
-            <input
-              type="text"
-              name="aadharCardNumber"
-              value={formData.aadharCardNumber}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+            {/* Aadhar */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Aadhar Card Number
+              </label>
+              <input
+                type="text"
+                name="aadharCardNumber"
+                value={formData.aadharCardNumber}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-yellow-300">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-          </div>
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          {/* Terms */}
-          <div className="flex items-center text-yellow-200">
-            <input
-              type="checkbox"
-              checked={agreeToTerms}
-              onChange={() => setAgreeToTerms(!agreeToTerms)}
-              className="mr-2 accent-yellow-500"
-            />
-            <span className="text-sm">
-              I agree to the{" "}
-              <a href="#" className="text-yellow-400 hover:underline">
-                terms and conditions
-              </a>
-            </span>
-          </div>
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-yellow-300">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full px-3 py-2 bg-gray-700 text-yellow-100 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading || !agreeToTerms}
-            className={`w-full py-2 font-semibold rounded-md transition ${
-              loading || !agreeToTerms
-                ? "bg-gray-600 text-gray-300 cursor-not-allowed opacity-50"
-                : "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-            }`}
-          >
-            {loading ? "Registering..." : "Register"}
-          </button>
-        </form>
+            {/* Terms */}
+            <div className="flex items-center text-yellow-200">
+              <input
+                type="checkbox"
+                checked={agreeToTerms}
+                onChange={() => setAgreeToTerms(!agreeToTerms)}
+                className="mr-2 accent-yellow-500"
+              />
+              <span className="text-sm">
+                I agree to the{" "}
+                <a href="#" className="text-yellow-400 hover:underline">
+                  terms and conditions
+                </a>
+              </span>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || !agreeToTerms}
+              className={`w-full py-2 font-semibold rounded-md transition ${
+                loading || !agreeToTerms
+                  ? "bg-gray-600 text-gray-300 cursor-not-allowed opacity-50"
+                  : "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
+              }`}
+            >
+              {loading ? "Registering..." : "Register"}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

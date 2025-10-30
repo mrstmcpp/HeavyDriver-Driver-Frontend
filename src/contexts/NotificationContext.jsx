@@ -78,30 +78,20 @@ export const NotificationProvider = ({ children }) => {
           <div>
             <p className="font-semibold text-yellow-400">Pickup Location:</p>
             <p className="text-sm">
-              {pickup.address || "Address not available"} <br />
-              {pickup.lat && pickup.lng && (
-                <span className="text-gray-400">
-                  ({pickup.lat.toFixed(4)}, {pickup.lng.toFixed(4)})
-                </span>
-              )}
+              {pickup.address || "Address not available"}
             </p>
           </div>
 
           <div>
             <p className="font-semibold text-yellow-400">Drop Location:</p>
             <p className="text-sm">
-              {drop.address || "Address not available"} <br />
-              {drop.lat && drop.lng && (
-                <span className="text-gray-400">
-                  ({drop.lat.toFixed(4)}, {drop.lng.toFixed(4)})
-                </span>
-              )}
+              {drop.address || "Address not available"}
             </p>
           </div>
 
           <div>
             <p className="font-semibold text-yellow-400">Fare:</p>
-            <p className="text-lg font-bold text-yellow-500">₹{fare || 0}</p>
+            <p className="text-lg font-bold text-yellow-500">₹{fare}</p>
           </div>
 
           {passenger && (
