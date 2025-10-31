@@ -18,7 +18,8 @@ const useBookingStore = create((set, get) => ({
     try {
       const { userId } = useAuthStore.getState();
       if (!userId) {
-        if (import.meta.env.DEV) console.warn("⚠ No userId found in auth store.");
+        if (import.meta.env.DEV)
+          console.warn("⚠ No userId found in auth store.");
         set({ loadingBooking: false });
         return;
       }
@@ -54,7 +55,15 @@ const useBookingStore = create((set, get) => ({
     }
   },
 
-  
+  clearActiveBooking: () => {
+    set({ activeBooking: null, bookingStatus: null, loadingBooking: false });
+  },
+
+  setActiveBooking: (booking) =>
+    set({
+      activeBooking: booking.bookingId,
+      bookingStatus: booking.bookingStatus,
+    }),
 }));
 
 export default useBookingStore;

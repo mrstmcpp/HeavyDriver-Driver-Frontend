@@ -3,11 +3,15 @@ import { eventEmitter } from "../utils/eventEmitter";
 import { useSocket } from "../contexts/SocketContext";
 import { useNotification } from "../contexts/NotificationContext";
 import useAuthStore from "../contexts/AuthContext";
+import useBookingStore from "../contexts/BookingContext";
+import { useNavigate } from "react-router-dom";
 
-export default function RideNotificationManager({ onSeeDetails }) {
+export default function RideNotificationManager() {
   const { userId } = useAuthStore();
   const { clientRef, startRide, endRide } = useSocket();
   const { showNotification, showToast } = useNotification();
+  const { fetchActiveBooking } = useBookingStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleRideRequest = (data) => {
@@ -23,13 +27,9 @@ export default function RideNotificationManager({ onSeeDetails }) {
           bookingId: data.bookingId,
           pickup: data.pickup,
           drop: data.drop,
-          fare: data.fare,
           passenger: data.passenger,
         },
-        onSeeDetails: () => {
-          onSeeDetails?.(); // 👈 call parent function
-        },
-        onConfirm: () => {
+        onConfirm: async () => {
           if (!clientRef.current) return;
           clientRef.current.send(
             `/app/rideResponse/${userId}`,
@@ -41,7 +41,12 @@ export default function RideNotificationManager({ onSeeDetails }) {
               passengerId: data.passenger.id,
             })
           );
-          startRide(data.bookingId);
+
+          useBookingStore.getState().setActiveBooking({
+            bookingId: data.bookingId,
+            bookingStatus: "SCHEDULED",
+          });
+          setTimeout(() => fetchActiveBooking(), 1500);
         },
         onDecline: () => {
           if (!clientRef.current) return;
@@ -89,7 +94,7 @@ export default function RideNotificationManager({ onSeeDetails }) {
       eventEmitter.off("RIDE_STARTED", handleRideStarted);
       eventEmitter.off("RIDE_COMPLETED", handleRideCompleted);
     };
-  }, [clientRef, showNotification, showToast, startRide, endRide, onSeeDetails]);
+  }, [clientRef, showNotification, showToast, startRide, endRide]);
 
   return null;
 }

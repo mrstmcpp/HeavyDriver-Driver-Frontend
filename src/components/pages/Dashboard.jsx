@@ -75,7 +75,7 @@ const DashboardPage = () => {
         className="px-6 py-8 transition-colors duration-300
                  bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-[calc(100vh-6rem)]"
       >
-        {/* Welcome Section */}
+        {/* wlcm section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-wide mb-2">
             Welcome Back,{" "}
@@ -88,7 +88,7 @@ const DashboardPage = () => {
           </p>
         </div>
 
-        {/* Stats Section */}
+        {/* Stats section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {dashboardStats.map((stat, index) => (
             <div
@@ -117,7 +117,7 @@ const DashboardPage = () => {
           ))}
         </div>
 
-        {/* Bookings Section */}
+        {/* Bookings section */}
         <div className="mt-10">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold">Today's Activity</h2>
