@@ -19,6 +19,7 @@ import ActiveRide from "./components/pages/ActiveRide.jsx";
 import RideManager from "./components/RideManager.jsx";
 import RideDetailsPage from "./components/pages/RideDetailsPage.jsx";
 import Home from "./components/pages/Homepage.jsx";
+import ScrollToTop from "./utils/ScrollToTop.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -30,6 +31,7 @@ function App() {
   return (
     <>
       <RideNotificationManager />
+      <ScrollToTop/>
       <RideManager />
 
       <Routes>

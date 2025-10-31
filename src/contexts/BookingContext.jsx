@@ -53,6 +53,8 @@ const useBookingStore = create((set, get) => ({
       set({ loadingBooking: false });
     }
   },
+
+  
 }));
 
 export default useBookingStore;

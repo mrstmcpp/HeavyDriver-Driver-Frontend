@@ -33,7 +33,7 @@ const DriverRideDetails = () => {
         );
 
         setRide(res.data);
-        console.log("Ride details fetched successfully:", res.data);
+        // console.log("Ride details fetched successfully:", res.data);
       } catch (err) {
         console.error("Error fetching ride details:", err);
         setError(err.response?.data?.error || "Failed to fetch ride details");

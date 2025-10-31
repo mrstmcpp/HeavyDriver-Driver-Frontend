@@ -15,7 +15,7 @@ const DriverStatusButton = () => {
       return {
         icon: "pi pi-lock",
         label: "Active Ride - Locked Online",
-        className: "bg-green-700 text-white cursor-not-allowed opacity-90",
+        className: "bg-green-500 text-white cursor-not-allowed opacity-90",
         disabled: true,
       };
     }
@@ -24,7 +24,7 @@ const DriverStatusButton = () => {
       return {
         icon: "pi pi-ban",
         label: "You are Offline",
-        className: "bg-red-600 hover:bg-red-700 text-white",
+        className: "bg-red-500 hover:bg-red-700 text-white",
         disabled: false,
       };
     }

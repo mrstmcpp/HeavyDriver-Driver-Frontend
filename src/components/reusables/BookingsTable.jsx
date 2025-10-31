@@ -16,11 +16,12 @@ const BookingsTable = ({ bookings = [], loading }) => {
       minute: "2-digit",
     });
 
-  const earningsTemplate = () => (
-    <span className="text-yellow-500">
-      ₹{Math.floor(Math.random() * 300) + 100}
-    </span>
-  );
+  const fareTemplate = (rowData) => {
+    if (rowData.fare === null || rowData.fare === undefined) {
+      return <span className="text-gray-400 italic">Not available</span>;
+    }
+    return <span className="text-yellow-400 font-semibold">₹{rowData.fare}</span>;
+  };
 
   const statusTemplate = (rowData) => {
     let colorClass = "text-gray-400";
@@ -45,13 +46,18 @@ const BookingsTable = ({ bookings = [], loading }) => {
         loading={loading}
         stripedRows
         tableStyle={{ minWidth: "50rem" }}
-        
         emptyMessage="No bookings found."
       >
         <Column field="id" header="ID" sortable style={{ width: "10%" }} />
         <Column header="Date" body={dateTemplate} sortable style={{ width: "20%" }} />
-        <Column header="Earnings" body={earningsTemplate} style={{ width: "10%" }} />
-        <Column field="status" header="Status" body={statusTemplate} sortable style={{ width: "15%" }} />
+        <Column header="Fare" body={fareTemplate} sortable style={{ width: "10%" }} />
+        <Column
+          field="status"
+          header="Status"
+          body={statusTemplate}
+          sortable
+          style={{ width: "15%" }}
+        />
         <Column body={actionTemplate} header="Action" style={{ width: "10%" }} />
       </DataTable>
     </div>

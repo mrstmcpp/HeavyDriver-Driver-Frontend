@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import DriverMap from "../maps/DriverMap.jsx";
 import RideStatusButton from "../reusables/RideStatusButton.jsx";
 import { useNotification } from "../../contexts/NotificationContext.jsx";
-import { Helmet } from "react-helmet-async";
 import PageMeta from "../common/PageMeta.jsx";
 
 const ActiveRide = () => {
@@ -114,7 +113,7 @@ const ActiveRide = () => {
         { driverId: userId, bookingStatus: "COMPLETED" }
       );
       showToast("info", "Ride Ended", "Thank you for driving.");
-      window.location.href = "/";
+      // window.location.href = "/";
     } catch (err) {
       console.error("Failed to end ride:", err);
       showToast("error", err.response.data.error, "Please try again.");

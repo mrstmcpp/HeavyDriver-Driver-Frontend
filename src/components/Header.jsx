@@ -152,8 +152,8 @@ const Header = ({ onMenuClick }) => {
             {open && (
               <div
                 className="absolute right-0 top-full mt-2 w-44 
-                bg-gray-800 dark:bg-gray-200 
-                text-yellow-300 dark:text-gray-900 
+                 dark:bg-gray-900
+                text-yellow-300 dark:text-gray-200 
                 rounded-lg shadow-lg border 
                 border-yellow-600/20 dark:border-gray-400 
                 overflow-hidden z-50 animate-fadeIn"
@@ -161,17 +161,17 @@ const Header = ({ onMenuClick }) => {
                 <Link
                   to="/profile"
                   onClick={() => setOpen(false)}
-                  className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-700/70 dark:hover:bg-gray-300/70 transition"
+                  className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-800 dark:hover:bg-gray-800 transition"
                 >
-                  <i className="fa-solid fa-user text-yellow-400 dark:text-gray-900"></i>
+                  <i className="fa-solid fa-user text-yellow-400 dark:text-gray-400"></i>
                   Profile
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-4 py-2 
-                  hover:bg-gray-700/70 dark:hover:bg-gray-300/70 transition"
+                  hover:bg-gray-800 dark:hover:bg-gray-800 transition"
                 >
-                  <i className="fa-solid fa-right-from-bracket text-yellow-400 dark:text-gray-900"></i>
+                  <i className="fa-solid fa-right-from-bracket text-yellow-400 dark:text-gray-400"></i>
                   Logout
                 </button>
               </div>
@@ -182,7 +182,7 @@ const Header = ({ onMenuClick }) => {
             <Button
               label="Login"
               icon="pi pi-sign-in"
-              className="p-button-outlined p-button-warning font-semibold"
+              className="p-button-outlined p-button-warning font-semibold "
               onClick={() => navigate("/login")}
             />
             <Button
