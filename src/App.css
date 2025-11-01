@@ -46,3 +46,16 @@ button, [role="button"], a, input[type="button"], input[type="submit"] {
     .animate-pulse-slow {
       animation: pulse-slow 6s ease-in-out infinite;
     }
+
+
+
+/* Center PrimeReact ConfirmDialog always */
+.p-confirm-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  width: 90vw !important;
+  max-width: 480px !important;
+}

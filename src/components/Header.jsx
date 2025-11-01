@@ -5,8 +5,8 @@ import axios from "axios";
 import { useNotification } from "../contexts/NotificationContext.jsx";
 import useBookingStore from "../contexts/BookingContext.jsx";
 import { useSocket } from "../contexts/SocketContext.jsx";
-import profilePic from "../assets/man2.png";
 import { Button } from "primereact/button";
+import { Tooltip } from "primereact/tooltip";
 
 const Header = ({ onMenuClick }) => {
   const [open, setOpen] = useState(false);
@@ -24,7 +24,7 @@ const Header = ({ onMenuClick }) => {
   const loadingBooking = useBookingStore((state) => state.loadingBooking);
 
   const fetchedOnce = useRef(false);
-  const { connected } = useSocket();
+  const { connected, isDriverOnline, goOnline, goOffline } = useSocket();
 
   useEffect(() => {
     if (
@@ -84,18 +84,23 @@ const Header = ({ onMenuClick }) => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`,
-        {},
-        { withCredentials: true }
-      );
-      window.location.href = "/login";
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
+  // const handleLogout = async () => {
+  //   try {
+  //     await axios.post(
+  //       `${import.meta.env.VITE_AUTH_BACKEND_URL}/signout`,
+  //       {},
+  //       { withCredentials: true }
+  //     );
+  //     window.location.href = "/login";
+  //   } catch (err) {
+  //     console.error("Logout failed:", err);
+  //   }
+  // };
+
+  // const handleToggle = (value) => {
+  //   if (value) goOnline();
+  //   else goOffline();
+  // };
 
   return (
     <header
@@ -126,7 +131,6 @@ const Header = ({ onMenuClick }) => {
         }`}
         onClick={() => navigate("/")}
       >
-
         HeavyDriver
       </h1>
 
@@ -134,48 +138,48 @@ const Header = ({ onMenuClick }) => {
         {loading ? (
           <div className="text-gray-400 text-sm">Loading...</div>
         ) : authUser ? (
-          <div className="flex flex-row items-center gap-4">
-            <button
-              onClick={() => setOpen((prev) => !prev)}
-              className="flex items-center gap-2 focus:outline-none hover:opacity-90 transition"
-            >
-              <img
-                src={authUser.profilePic || profilePic}
-                alt="Driver DP"
-                className={`h-10 w-10 rounded-full border-3 ${
-                  connected ? "border-green-500" : "border-gray-500"
-                }`}
-              />
-              <i className="fa-solid fa-chevron-down text-yellow-400 dark:text-gray-900 text-lg"></i>
-            </button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-gray-800/40 border border-gray-600 text-xs">
+              {/* <InputSwitch
+                checked={isDriverOnline}
+                onChange={(e) => handleToggle(e.value)}
+                disabled={isDriverOnline && !connected}
+                className="scale-75"
+              /> */}
 
-            {open && (
-              <div
-                className="absolute right-0 top-full mt-2 w-44 
-                 dark:bg-gray-900
-                text-yellow-300 dark:text-gray-200 
-                rounded-lg shadow-lg border 
-                border-yellow-600/20 dark:border-gray-400 
-                overflow-hidden z-50 animate-fadeIn"
-              >
-                <Link
-                  to="/profile"
-                  onClick={() => setOpen(false)}
-                  className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-800 dark:hover:bg-gray-800 transition"
-                >
-                  <i className="fa-solid fa-user text-yellow-400 dark:text-gray-400"></i>
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-4 py-2 
-                  hover:bg-gray-800 dark:hover:bg-gray-800 transition"
-                >
-                  <i className="fa-solid fa-right-from-bracket text-yellow-400 dark:text-gray-400"></i>
-                  Logout
-                </button>
-              </div>
-            )}
+              <>
+                <Tooltip target=".status-indicator" />
+
+                {!isDriverOnline ? (
+                  <span
+                    className="status-indicator flex items-center gap-1 text-gray-300"
+                    data-pr-tooltip="Currently offline. You won’t receive ride requests."
+                    data-pr-position="bottom"
+                  >
+                    <i className="pi pi-times-circle text-gray-400 text-sm"></i>
+                    Offline
+                  </span>
+                ) : connected ? (
+                  <span
+                    className="status-indicator flex items-center gap-1 text-green-400"
+                    data-pr-tooltip="Online — ready to accept new ride requests!"
+                    data-pr-position="bottom"
+                  >
+                    <i className="pi pi-check-circle text-green-400 text-sm"></i>
+                    Online
+                  </span>
+                ) : (
+                  <span
+                    className="status-indicator flex items-center gap-1 text-yellow-400"
+                    data-pr-tooltip="Connecting to server. Please wait..."
+                    data-pr-position="bottom"
+                  >
+                    <i className="pi pi-spinner pi-spin text-yellow-400 text-sm"></i>
+                    Connecting...
+                  </span>
+                )}
+              </>
+            </div>
           </div>
         ) : (
           <div className="flex gap-3">

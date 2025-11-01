@@ -1,9 +1,17 @@
-import React, { createContext, useContext, useRef, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import useBookingStore from "./BookingContext";
+// Note: Timeline component is no longer needed unless used elsewhere
+// import { Timeline } from 'primereact/timeline';
 
 const NotificationContext = createContext();
 export const useNotification = () => useContext(NotificationContext);
@@ -81,30 +89,51 @@ export const NotificationProvider = ({ children }) => {
     ride: "border-yellow-500 bg-yellow-500/10 text-yellow-300",
   };
 
+
   const renderMessage = (msg) => {
     if (typeof msg === "string") return <p className="text-base">{msg}</p>;
 
     if (msg.type === "RIDE_REQUEST") {
-      const { pickup, drop, passenger } = msg;
+      const pickupAddress =
+        msg.pickup?.address
+      const dropAddress =
+        msg.drop?.address
+
       return (
-        <div className="space-y-3 text-base leading-relaxed">
-          <div>
-            <p className="font-semibold text-yellow-400">Pickup Location:</p>
-            <p className="text-sm">{pickup.address || "Address not available"}</p>
+        <div className="flex gap-4 pt-2">
+          <div className="flex flex-col items-center self-stretch">
+            <span
+              className="flex items-center justify-center w-8 h-8 rounded-full shadow-lg flex-shrink-0"
+              style={{ backgroundColor: "#4CAF50" }}
+            >
+              <i className="pi pi-map-marker text-white text-md" />
+            </span>
+            <div
+              className="w-0.5 flex-1 my-1" // flex-1 makes it fill vertical space
+              style={{ backgroundColor: "#FFC107" }} // Yellow line
+            ></div>
+            <span
+              className="flex items-center justify-center w-8 h-8 rounded-full shadow-lg flex-shrink-0"
+              style={{ backgroundColor: "#FFC107" }}
+            >
+              <i className="pi pi-flag text-white text-md" />
+            </span>
           </div>
 
-          <div>
-            <p className="font-semibold text-yellow-400">Drop Location:</p>
-            <p className="text-sm">{drop.address || "Address not available"}</p>
-          </div>
-
-          {passenger && (
-            <div>
-              <p className="font-semibold text-yellow-400">Passenger:</p>
-              <p className="text-sm">{passenger.fullName || "Unknown"}</p>
+          {/* Col 2: Text Content */}
+          <div className="flex flex-col justify-between flex-1">
+            {/* Pickup Text */}
+            <div className="text-sm text-gray-200 font-medium leading-5">
+              <div className="text-base font-semibold">Pickup Location</div>
+              <div className="text-xs opacity-80">{pickupAddress}</div>
             </div>
-          )}
 
+            {/* Drop Text */}
+            <div className="text-sm text-gray-200 font-medium leading-5">
+              <div className="text-base font-semibold">Drop Location</div>
+              <div className="text-xs opacity-80">{dropAddress}</div>
+            </div>
+          </div>
         </div>
       );
     }
@@ -133,12 +162,19 @@ export const NotificationProvider = ({ children }) => {
             </p>
           </div>
         }
-        className={`rounded-2xl shadow-2xl border ${typeColors[notification.type]} 
+        /**
+         * ## 🎨 UI TWEAK ##
+         * Removed 'transform scale-105 hover:scale-100' for a stable,
+         * professional look. Added 'overflow-hidden'.
+         */
+        className={`rounded-2xl shadow-2xl border ${
+          typeColors[notification.type]
+        } 
           backdrop-blur-md bg-opacity-70 transition-all duration-300 max-w-md
-          transform scale-105 hover:scale-100`}
+          overflow-hidden`}
         footer={
           notification.showActions && (
-            <div className="flex justify-end gap-3 mt-3">
+            <div className="flex justify-end gap-3">
               <Button
                 label={notification.confirmLabel || "Confirm"}
                 icon="pi pi-check"

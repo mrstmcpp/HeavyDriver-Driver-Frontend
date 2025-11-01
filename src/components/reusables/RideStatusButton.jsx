@@ -8,7 +8,7 @@ const RideStatusButton = ({
   isLoading,
 }) => {
   const buttonClassName =
-    "w-full !bg-yellow-500 !hover:bg-yellow-400 text-black font-semibold py-2 px-5 rounded-lg border-none";
+    "w-full !bg-yellow-500 !hover:bg-yellow-400 text-black font-semibold py-2 px-5 rounded-lg !border-none";
 
   switch (status) {
     case "SCHEDULED":
@@ -34,9 +34,9 @@ const RideStatusButton = ({
     case "IN_RIDE":
       return (
         <Button
-          label="End Ride"
+          label="Complete Ride"
           icon="pi pi-stop-circle"
-          className="w-full !bg-red-500 !hover:bg-red-400 text-white font-semibold py-2 px-5 rounded-lg border-none" // Different color for "End"
+          className="w-full !bg-red-500 !hover:bg-red-400 text-white font-semibold py-2 px-5 rounded-lg !border-none" // Different color for "End"
           onClick={onEndRide}
           loading={isLoading}
         />
