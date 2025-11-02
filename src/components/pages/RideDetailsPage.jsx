@@ -12,6 +12,7 @@ const DriverRideDetails = () => {
   const navigate = useNavigate();
 
   const [ride, setRide] = useState(null);
+  const [review, setReview] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false);
@@ -29,11 +30,24 @@ const DriverRideDetails = () => {
           {
             userId: authUser.userId,
             role: "DRIVER",
-          }
+          },
+          { withCredentials: true }
         );
 
         setRide(res.data);
-        // console.log("Ride details fetched successfully:", res.data);
+
+        if (res.data.bookingStatus === "COMPLETED") {
+          try {
+            const reviewRes = await axios.get(
+              `${import.meta.env.VITE_REVIEW_BACKEND_URL}/review/booking/${bookingId}`,
+              { withCredentials: true }
+            );
+            setReview(reviewRes.data);
+            // console.log("Passenger review fetched successfully.", reviewRes);
+          } catch (err) {
+            console.log("No passenger review found yet.");
+          }
+        }
       } catch (err) {
         console.error("Error fetching ride details:", err);
         setError(err.response?.data?.error || "Failed to fetch ride details");
@@ -44,7 +58,7 @@ const DriverRideDetails = () => {
     };
 
     if (bookingId && authUser?.userId) fetchRideDetails();
-  }, [bookingId, authUser, authLoading]);
+  }, [bookingId, authUser, authLoading, navigate]);
 
   if (isFetching) {
     return (
@@ -102,7 +116,6 @@ const DriverRideDetails = () => {
 
       <div className="px-6 text-white py-8">
         <div className="space-y-6">
-          {/* Passenger Info */}
           <h1 className="text-3xl font-bold text-yellow-400 text-center mb-6">
             Ride Details for {passengerName || "Unknown Passenger"}
           </h1>
@@ -167,7 +180,6 @@ const DriverRideDetails = () => {
                 </p>
               </div>
 
-              {/* Time Details */}
               <div className="flex flex-col sm:flex-row justify-between gap-4 border-t border-gray-700 pt-4 mt-4">
                 <div>
                   <p className="text-gray-400 text-sm">Start Time</p>
@@ -189,7 +201,6 @@ const DriverRideDetails = () => {
                 </div>
               </div>
 
-              {/* Fare + Payment */}
               <div className="flex items-center justify-between border-t border-gray-700 pt-4 mt-4">
                 <div>
                   <p className="text-gray-400 text-sm">Fare</p>
@@ -226,7 +237,6 @@ const DriverRideDetails = () => {
               </button>
             </div>
 
-            {/* ✅ Toggle Map */}
             {showMap && (
               <div className="mt-6 rounded-xl overflow-hidden border border-gray-800">
                 <DriverMap
@@ -237,9 +247,33 @@ const DriverRideDetails = () => {
               </div>
             )}
           </div>
+
+          {/* ✅ Passenger Review Section */}
+          {bookingStatus === "COMPLETED" && review && (
+            <div className="bg-[#141414] border border-gray-800 rounded-2xl shadow-xl p-6">
+              <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-800 pb-3 mb-5 flex items-center gap-2">
+                <i className="pi pi-comment text-yellow-400 text-xl" />
+                Passenger Review
+              </h3>
+
+              <div className="text-gray-300 space-y-3">
+                <p className="text-lg font-semibold text-yellow-400">
+                  ⭐ {review.rating}/5
+                </p>
+
+                {review.content ? (
+                  <p className="text-gray-300 italic border-l-4 border-yellow-400 pl-4">
+                    "{review.content}"
+                  </p>
+                ) : (
+                  <p className="text-gray-500 italic">No written feedback provided.</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* CTA Buttons */}
+        {/* CTA */}
         <div className="text-center mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={() => navigate("/dashboard")}

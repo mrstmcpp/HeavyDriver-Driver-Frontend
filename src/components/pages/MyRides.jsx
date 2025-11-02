@@ -5,6 +5,7 @@ import CarLoader from "../reusables/CarLoader.jsx";
 import useAuthStore from "../../contexts/AuthContext.jsx";
 import BookingsTable from "../reusables/BookingsTable.jsx";
 import PageMeta from "../common/PageMeta.jsx";
+import axios from "axios";
 
 const MyRides = () => {
   const { authUser, loading: authLoading } = useAuthStore();
@@ -44,10 +45,8 @@ const MyRides = () => {
         }/all-booking?offset=${pageNumber}&pageSize=${pageSize}`;
       }
 
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch bookings");
+      const { data } = await axios.get(url, { withCredentials: true });
 
-      const data = await res.json();
       setBookings(data.bookingList || []);
       setTotalItems(data.totalItems || data.bookingList?.length || 0);
     } catch (err) {
