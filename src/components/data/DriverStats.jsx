@@ -1,7 +1,7 @@
-export const stats = ({ totalItems }) => [
+export const stats = ({ totalItems , todayEarnings, weekEarnings }) => [
   {
     title: "Earnings",
-    value: "₹ 2,340",
+    value: "₹ " + todayEarnings,
     subtitle: "Today",
     icon: "pi pi-wallet",
     color: "yellow",
@@ -22,7 +22,7 @@ export const stats = ({ totalItems }) => [
   },
   {
     title: "Weekly Earnings",
-    value: "₹ 12,870",
+    value: "₹ " + weekEarnings,
     subtitle: "Past 7 days total",
     icon: "pi pi-chart-line",
     color: "orange",

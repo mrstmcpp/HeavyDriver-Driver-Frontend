@@ -20,6 +20,7 @@ import RideManager from "./components/RideManager.jsx";
 import RideDetailsPage from "./components/pages/RideDetailsPage.jsx";
 import Home from "./components/pages/Homepage.jsx";
 import ScrollToTop from "./utils/ScrollToTop.jsx";
+import Verification from "./components/pages/Verification.jsx";
 
 axios.defaults.withCredentials = true;
 function App() {
@@ -52,6 +53,15 @@ function App() {
             element={
               <ProtectedRoutes>
                 <ActiveRide />
+              </ProtectedRoutes>
+            }
+          />
+
+          <Route
+            path="/verification"
+            element={
+              <ProtectedRoutes>
+                <Verification />
               </ProtectedRoutes>
             }
           />

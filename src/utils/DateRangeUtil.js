@@ -8,6 +8,9 @@ export const calculateDateRange = (option = "30d") => {
   const fromDate = new Date();
 
   switch (option) {
+    case "1d":
+      fromDate.setDate(toDate.getDate() - 1);
+      break;
     case "7d":
       fromDate.setDate(toDate.getDate() - 7);
       break;
