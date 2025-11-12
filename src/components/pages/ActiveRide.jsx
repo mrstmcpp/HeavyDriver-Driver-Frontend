@@ -65,9 +65,7 @@ const ActiveRide = () => {
     setError("");
     try {
       await axios.put(
-        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/${
-          rideDetails.bookingId
-        }/updateStatus`,
+        `${import.meta.env.VITE_GATEWAY_BACKEND_URL}/booking/updateStatus`,
         { driverId: userId, bookingStatus: "ARRIVED" }
       );
       setRideDetails((prev) => ({ ...prev, bookingStatus: "ARRIVED" }));
@@ -89,9 +87,7 @@ const ActiveRide = () => {
 
     try {
       await axios.put(
-        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/${
-          rideDetails.bookingId
-        }/updateStatus`,
+        `${import.meta.env.VITE_GATEWAY_BACKEND_URL}/booking/updateStatus`,
         { driverId: userId, bookingStatus: "IN_RIDE", otp: otp }
       );
       setRideDetails((prev) => ({ ...prev, bookingStatus: "IN_RIDE" }));
@@ -116,10 +112,8 @@ const ActiveRide = () => {
 
     try {
       await axios.put(
-        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/${
-          rideDetails.bookingId
-        }/updateStatus`,
-        { driverId: userId, bookingStatus: "COMPLETED" }
+        `${import.meta.env.VITE_GATEWAY_BACKEND_URL}/booking/updateStatus`,
+        { bookingStatus: "COMPLETED" },{withCredentials : true}
       );
 
       showToast("info", "Ride Ended", "Thank you for driving.");

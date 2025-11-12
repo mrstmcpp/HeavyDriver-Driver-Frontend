@@ -17,7 +17,7 @@ const Earnings = () => {
     try {
       const { from, to } = calculateDateRange(option);
 
-      const res = await axios.get(
+      const totalEarningsResponse = await axios.get(
         `${import.meta.env.VITE_BOOKING_BACKEND_URL}/fare/analytics`,
         {
           params: { fromDate: from, toDate: to },
@@ -25,8 +25,17 @@ const Earnings = () => {
         }
       );
 
-      setSummary(res.data);
-      setChartData(res.data.dailyEarnings || []);
+      const dailyEarningsResponse = await axios.get(
+        `${import.meta.env.VITE_BOOKING_BACKEND_URL}/fare/analytics/daily`,
+        {
+          params: { fromDate: from, toDate: to },
+          withCredentials: true,
+        }
+      );
+
+      setSummary(totalEarningsResponse.data);
+      setChartData(dailyEarningsResponse.data || []);
+      // console.log(dailyEarningsResponse.data);
     } catch (error) {
       console.error("Error fetching earnings data:", error);
     } finally {
@@ -57,22 +66,25 @@ const Earnings = () => {
                 label="Total Earnings"
                 value={`₹${summary.totalEarnings?.toFixed(2) || 0}`}
                 icon="pi pi-wallet"
+                red
               />
               <InfoCard
                 label="This Month"
                 value={`₹${summary.thisMonthEarnings?.toFixed(2) || 0}`}
                 icon="pi pi-calendar"
+                red
               />
               <InfoCard
                 label="Pending"
                 value={`₹${summary.pendingEarnings?.toFixed(2) || 0}`}
                 icon="pi pi-clock"
-                red
+                green
               />
               <InfoCard
                 label="Withdrawn"
                 value={`₹${summary.withdrawnEarnings?.toFixed(2) || 0}`}
                 icon="pi pi-check-circle"
+                red
               />
             </>
           )}

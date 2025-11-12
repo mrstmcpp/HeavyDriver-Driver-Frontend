@@ -75,8 +75,8 @@ const DashboardPage = () => {
           ),
         ]);
         
-        console.log("todays res : " , todayRes.data);
-        console.log("todays res : " , weekRes.data);
+        // console.log("todays res : " , todayRes.data);
+        // console.log("todays res : " , weekRes.data);
         setEarnings({
           today: todayRes.data.totalEarnings || 0,
           week: weekRes.data.totalEarnings || 0,

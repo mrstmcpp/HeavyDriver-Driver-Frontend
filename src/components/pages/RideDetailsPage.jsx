@@ -120,7 +120,7 @@ const DriverRideDetails = () => {
             Ride Details for {passengerName || "Unknown Passenger"}
           </h1>
 
-          <div className="bg-[#141414] border border-gray-800 rounded-2xl shadow-xl p-6 flex flex-col sm:flex-row items-center gap-6 hover:scale-[1.02] transition-transform">
+          <div className="bg-[#141414] border border-gray-800 rounded-2xl shadow-xl p-6 flex flex-col sm:flex-row items-center gap-6">
             <img
               src={userProfilePage}
               alt={passengerName}
@@ -248,7 +248,7 @@ const DriverRideDetails = () => {
             )}
           </div>
 
-          {/* ✅ Passenger Review Section */}
+
           {bookingStatus === "COMPLETED" && review && (
             <div className="bg-[#141414] border border-gray-800 rounded-2xl shadow-xl p-6">
               <h3 className="text-2xl font-semibold text-yellow-400 border-b border-gray-800 pb-3 mb-5 flex items-center gap-2">

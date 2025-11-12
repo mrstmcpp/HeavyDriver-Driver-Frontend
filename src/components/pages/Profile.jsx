@@ -15,7 +15,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_AUTH_BACKEND_URL}/details`,
+          `${import.meta.env.VITE_AUTH_BACKEND_URL}/driver/details`,
           {
             withCredentials: true,
           }

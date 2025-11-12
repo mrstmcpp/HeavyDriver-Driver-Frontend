@@ -71,6 +71,15 @@ const SidebarComponent = ({ sidebarVisible, onHide }) => {
                 </li>
                 <li>
                   <Link
+                    to="/verification"
+                    onClick={onHide}
+                    className="flex items-center px-4 py-3 rounded-lg mx-2 hover:bg-yellow-400 hover:text-black transition-colors duration-200"
+                  >
+                    <i className="pi pi-verified mr-4 text-xl"></i>Verification
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     to="/settings"
                     onClick={onHide}
                     className="flex items-center px-4 py-3 rounded-lg mx-2 hover:bg-yellow-400 hover:text-black transition-colors duration-200"
@@ -79,15 +88,6 @@ const SidebarComponent = ({ sidebarVisible, onHide }) => {
                   </Link>
                 </li>
 
-                <li>
-                  <Link
-                    to="/verification"
-                    onClick={onHide}
-                    className="flex items-center px-4 py-3 rounded-lg mx-2 hover:bg-yellow-400 hover:text-black transition-colors duration-200"
-                  >
-                    <i className="pi pi-verified mr-4 text-xl"></i>Verification
-                  </Link>
-                </li>
               </ul>
             </>
           ) : (
