@@ -32,7 +32,7 @@ export const useLocationStore = create((set) => ({
             if (!userId) throw new Error("Driver not logged in");
 
             const res = await axios.post(
-              `${import.meta.env.VITE_LOCATION_BACKEND_URL}/driver/${userId}/location`,
+              `${import.meta.env.VITE_LOCATION_BACKEND_URL}/drivers/location`,
               {
                 latitude: coords.lat,
                 longitude: coords.lng,

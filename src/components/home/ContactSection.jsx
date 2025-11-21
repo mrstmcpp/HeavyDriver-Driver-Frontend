@@ -13,7 +13,7 @@ const ContactSection = () => {
       <div className="flex flex-col md:flex-row justify-center items-center gap-8 text-gray-300 mb-10">
         <div className="flex items-center gap-3 hover:text-yellow-400 transition-colors">
           <i className="pi pi-envelope text-yellow-400 text-2xl" />
-          <span>support@heavydriver.in</span>
+          <span>support@heavydriver.app</span>
         </div>
         <div className="flex items-center gap-3 hover:text-yellow-400 transition-colors">
           <i className="pi pi-map-marker text-yellow-400 text-2xl" />
